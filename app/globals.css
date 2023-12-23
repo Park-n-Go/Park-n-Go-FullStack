@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer utilities {
+.logoglow{
+  box-shadow: 0 0 5px white,
+  0 0 25px white,
+  0 0 50px  white,
+  0 0 100px white ,
+  0 0 115px  white,
+  0 0 125px white,
+  0 0 150px white,
+  0 0 200px ;
+}
+
+}
+
+html,body:root {
+  height: 100%;
+ margin: 0px;
+ padding: 0px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+
