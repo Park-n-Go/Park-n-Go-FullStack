@@ -2,6 +2,39 @@ import mongoose from "mongoose";
 
 
 // import { v4 as uuidv4 } from "uuid";
+const emailSchema = new mongoose.Schema({
+  email_address: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  id: {
+    type: String,
+    required: true,
+  },
+  linked_to: {
+    type: [String], // Assuming linked_to is an array of strings
+    default: [],
+  },
+  object: {
+    type: String,
+    required: true,
+  },
+  verification: {
+    status: {
+      type: String,
+      enum: ['verified', 'unverified'], // Adjust enum values based on possible statuses
+      required: true,
+    },
+    strategy: {
+      type: String,
+      required: true,
+    },
+  },
+});
+
+
+
 
   const UserSchema = new mongoose.Schema(
     {
@@ -23,12 +56,9 @@ import mongoose from "mongoose";
         required: false,
         min: 2,
         max: 100,
-      },
-      email: {
-        type: String,
-        required: false,
-        max: 50,
-        unique: true,
+      },email_addresses: {
+        type: [emailSchema], // An array of emailSchema
+        required: true,
       },
       password: {
         type: String,
@@ -42,10 +72,11 @@ import mongoose from "mongoose";
       vehicle_IDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" }],
   
       profilePicture: String,
-      mobile: Number,
+      phoneNumbers: [{type: String}],
   
       jobPosition: { type: String, },
       company_ID: { type: String },
+
     },
     { timestamps: true }
   );

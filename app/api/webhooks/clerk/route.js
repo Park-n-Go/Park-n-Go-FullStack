@@ -35,13 +35,16 @@ try {
     return new Response('Error occured',{status:400})
 }
 
-const {id} = evt.data;
+const userData = evt.data;
 const eventType = evt.type
-
 if(eventType == "user.created")
 {
     dbConnect()
-   registerUser(req=payload)
+    
+   const user= await registerUser({body:{...userData,source:"clerk"}})
+   
+   return new Response(user.body,user.status)
+   
     
 }
 
