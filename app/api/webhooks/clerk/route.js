@@ -1,7 +1,7 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import {dbConnect} from "@/Utils/connectDB";
-import { registerUser } from "@/Controller/register";
+import { createUser, updateUser } from "@/Controller/UserCRUD";
 
 
 export async function POST(req){
@@ -39,11 +39,20 @@ const userData = evt.data;
 const eventType = evt.type
 if(eventType == "user.created")
 {
-    dbConnect()
+   await dbConnect()
     
-   const user= await registerUser({body:{...userData,source:"clerk"}})
+   const res= await createUser({body:{...userData,source:"clerk"}})
    
-   return new Response(user.body,user.status)
+   return new Response(res.body,res.status)
+   
+    
+}
+if(eventType == "user.updated")
+{
+   await dbConnect()
+   const res = await updateUser({body:userData})
+   console.log(res)
+   return new Response(res.body,res.status)
    
     
 }

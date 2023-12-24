@@ -8,29 +8,6 @@ const emailSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  id: {
-    type: String,
-    required: true,
-  },
-  linked_to: {
-    type: [String], // Assuming linked_to is an array of strings
-    default: [],
-  },
-  object: {
-    type: String,
-    required: true,
-  },
-  verification: {
-    status: {
-      type: String,
-      enum: ['verified', 'unverified'], // Adjust enum values based on possible statuses
-      required: true,
-    },
-    strategy: {
-      type: String,
-      required: true,
-    },
-  },
 });
 
 
@@ -56,10 +33,7 @@ const emailSchema = new mongoose.Schema({
         required: false,
         min: 2,
         max: 100,
-      },email_addresses: {
-        type: [emailSchema], // An array of emailSchema
-        required: true,
-      },
+      },email_addresses: [{type: String}],
       password: {
         type: String,
         required: false,
@@ -76,6 +50,8 @@ const emailSchema = new mongoose.Schema({
   
       jobPosition: { type: String, },
       company_ID: { type: String },
+      society_ID:{type:String},
+      
 
     },
     { timestamps: true }
