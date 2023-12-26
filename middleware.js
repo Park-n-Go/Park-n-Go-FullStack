@@ -1,11 +1,11 @@
 import { authMiddleware } from "@clerk/nextjs";
 
 export default authMiddleware({
-publicRoutes: ['/','/api/webhooks(.*)']
+publicRoutes: ['/','/api/webhooks(.*)','/api(.*)']
 
 });
  
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)' ,'/(api|trpc)(.*)' , '/test'],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)' ,'/(aapi|trpc)(.*)' , '/test'],
 };
  
