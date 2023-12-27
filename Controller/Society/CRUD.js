@@ -13,11 +13,9 @@ export const createSociety = async (req, res) => {
       societyMembers,
       societyStaffs,
       societyGuards,
-      projectReraNumber
-  }
-    
-     = req.body;
-    const society_check = await Society.findOne({projectReraNumber});
+      projectReraNumber,
+    } = req.body;
+    const society_check = await Society.findOne({ projectReraNumber });
     //Check if Society is already present
     if (society_check) {
       return {
@@ -27,7 +25,7 @@ export const createSociety = async (req, res) => {
         },
         status: { status: 400 },
       };
-      }
+    }
 
     const societyObj = {
       societyName,
@@ -40,13 +38,13 @@ export const createSociety = async (req, res) => {
       societyMembers,
       societyStaffs,
       societyGuards,
-      projectReraNumber
-  };
+      projectReraNumber,
+    };
 
     //Society creation
     const society = new Society(societyObj);
     await society.save();
-    const society_res = await Society.findById(society._id, {
+    const society_res = await Society.findById(society._id, {_id:0,
       __v: 0,
     });
     return { body: society_res, status: { status: 201 } };
@@ -64,8 +62,7 @@ export const createSociety = async (req, res) => {
 // Society updataion
 export const updateSociety = async (req, res) => {
   try {
-    
-     const society_data = await Society.findById(req.body._id)
+    const society_data = await Society.findById(req.body.id);
     if (!society_data) {
       return {
         body: {
@@ -75,16 +72,21 @@ export const updateSociety = async (req, res) => {
         status: { status: 400 },
       };
     }
-    
 
-    const {_id,projectReraNumber,...reqDataWithOutReraNumber }=req.body
+    const { id, projectReraNumber, ...reqDataWithOutReraNumber } = req.body;
 
     //merging two objects
-    const societyObj = Object.assign({},reqDataWithOutReraNumber, {projectReraNumber: society_data?.projectReraNumber ? society_data.projectReraNumber : req?.body?.projectReraNumber,
-      }) 
-      
-    const updatedSociety = await Society.findByIdAndUpdate(_id,societyObj,{new: true,});
-   
+    const societyObj = Object.assign({}, reqDataWithOutReraNumber, {
+      projectReraNumber: society_data?.projectReraNumber
+        ? society_data.projectReraNumber
+        : req?.body?.projectReraNumber,
+    });
+
+    const updatedSociety = await Society.findByIdAndUpdate(id, societyObj, {
+      new: true
+    }).select(['-_id','-__v'])    ;
+
+
     return { body: { updatedSociety }, status: { status: 200 } };
   } catch (error) {
     return {
@@ -98,10 +100,10 @@ export const updateSociety = async (req, res) => {
 };
 
 // Society deletion
-export const deleteUser = async (req, res) => {
+export const deleteSociety = async (req, res) => {
   try {
     const society_data = req.body;
-    const society = await Society.findOne({ uuid: society_data.id });
+    const society = await Society.findById(society_data.societyID);
     if (!society) {
       return {
         body: {
@@ -111,8 +113,8 @@ export const deleteUser = async (req, res) => {
         status: { status: 400 },
       };
     }
-    const deletedUser = await Society.findOneAndDelete({ uuid: society.uuid });
-    return { body: { society: deletedUser }, status: { status: 200 } };
+    await Society.findByIdAndDelete(society._id);
+    return { body: { isDeleted: true }, status: { status: 200 } };
   } catch (error) {
     return {
       body: {
@@ -123,6 +125,3 @@ export const deleteUser = async (req, res) => {
     };
   }
 };
-
-
-

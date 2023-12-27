@@ -6,7 +6,6 @@ import { NextResponse } from 'next/server'
 export async function POST(req) {
     
     const body= await req.json()
-    console.log(body)
     if(!body)
     {
         return new Response({error_message:"No Payload!"}, {status:400});
