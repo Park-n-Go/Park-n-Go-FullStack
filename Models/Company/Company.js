@@ -1,33 +1,11 @@
 import mongoose from "mongoose";
 
-const FlatSchema = new mongoose.Schema({
-  type: { type: String, required: true },
-  buildingName: { type: String, required: true },
-  number: { type: String, required: true },
-  floor: { type: String },
-});
-
-const AddressSchema = new mongoose.Schema({
-  addresslineOne: { type: String, required: true },
-  addresslineTwo: { type: String },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
-  country: { type: String, required: true },
-  pinCode: { type: Number, required: true },
-  landMark: { type: String },
-});
 
 
 
-
-const staffJobPositionEnum = ['indoor', 'outdoor', 'company office', 'main gate', 'others'];
-
-
-const projectReraNumberisVerifiedEnum = ['applied', 'pending', 'in-progress' ,'verified', 'unverified', 'failed verification'];
-
-const StaffSchema= new mongoose.Schema({ worker:{ type: mongoose.Schema.Types.ObjectId, ref: "User" },
+const StaffSchema= new mongoose.Schema({ staff:{ type: mongoose.Schema.Types.ObjectId, ref: "User" },
 jobCategory:{type:String},
-jobPosition:{type:String, enum:staffJobPositionEnum, default:'others'},
+jobPosition:{type:String},
 providerName:{type:String}
 })
 
@@ -43,22 +21,27 @@ const CompanySchema = new mongoose.Schema(
       min: 2,
       max: 100,
     },
-    companyEntrancePicture: { type: String},
+    companyOfficeEmail:{type: String, required:true,unique:true},
+    companyProfilePicture: { type: String},
     officePhoneNumbers: [{ type: String, required: true }],
-    builderName: { type: String, required: true },
-    builderOfficeAddress: { type: AddressSchema, required: true },
-    companyAddress: { type: AddressSchema },
-    flates: [{ type: FlatSchema }],
-    companyMembers:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
-    companyStaffs: [{type:StaffSchema}],
+    buildingName: { type: String, required: true },
+    headOfficeAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
+    companyAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address", required: true },
+    
+    companyEmployees:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
+    staffs: [{type:StaffSchema}],
     companyGuards: [{type:StaffSchema}],
-    projectReraNumber:{type:ProjectReraNumberSchema},
+    companyLocation:{type:String},
+    subcriptionTaken:{type:String},
+    subcriptionValidity:{type:String},
+    enrollmentDate:{type:String},
+    gstNumber:{type:String,required:true,unique:true},
     createdBy:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required:true }
   },
   { timestamps: true }
 );
 
-const company =
+const Company =
   mongoose?.models?.Company || mongoose.model("Company", CompanySchema);
 
-export default company;
+export default Company;

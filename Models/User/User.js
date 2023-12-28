@@ -38,8 +38,8 @@ const UserSchema = new mongoose.Schema(
     phoneNumbers: [{ type: String}],
 
     jobPosition: { type: String },
-    company_ID: { type: String },
-    address: {flatNumber:{type:String},scoiety:{type: mongoose.Schema.Types.ObjectId, ref: "Society"}},
+    company_ID: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
+    address: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
   },
   { timestamps: true }
 );

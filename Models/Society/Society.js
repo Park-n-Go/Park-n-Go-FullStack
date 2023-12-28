@@ -7,15 +7,6 @@ const FlatSchema = new mongoose.Schema({
   floor: { type: String },
 });
 
-const AddressSchema = new mongoose.Schema({
-  addresslineOne: { type: String, required: true },
-  addresslineTwo: { type: String },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
-  country: { type: String, required: true },
-  pinCode: { type: Number, required: true },
-  landMark: { type: String },
-});
 
 const staffJobPositionEnum = ['indoor', 'outdoor', 'society office', 'main gate', 'others'];
 
@@ -43,8 +34,8 @@ const SocietySchema = new mongoose.Schema(
     societyEntrancePicture: { type: String},
     officePhoneNumbers: [{ type: String, required: true }],
     builderName: { type: String, required: true },
-    builderOfficeAddress: { type: AddressSchema, required: true },
-    societyAddress: { type: AddressSchema },
+    builderOfficeAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
+    societyAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address"},
     flates: [{ type: FlatSchema }],
     societyMembers:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
     societyStaffs: [{type:StaffSchema}],

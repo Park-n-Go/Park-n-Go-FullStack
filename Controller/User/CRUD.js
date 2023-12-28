@@ -167,7 +167,7 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const user_data = req.body;
-    const user = await User.findOne({ uuid: user_data.id });
+    const user = await User.findOne({ uuid: user_data.uuid });
     if (!user) {
       return {
         body: {
@@ -177,8 +177,8 @@ export const deleteUser = async (req, res) => {
         status: { status: 400 },
       };
     }
-    const deletedUser = await User.findOneAndDelete({ uuid: user.uuid });
-    return { body: { user: deletedUser }, status: { status: 200 } };
+   await User.findByIdAndDelete(user._id);
+   return { body: { isDeleted: true }, status: { status: 200 } };
   } catch (error) {
     return {
       body: {

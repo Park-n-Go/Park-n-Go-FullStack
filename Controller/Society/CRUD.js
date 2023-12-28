@@ -1,5 +1,6 @@
 import User from "@/Models/User/User";
 import Society from "../../Models/Society/Society";
+import { createUser } from "../User/CRUD";
 
 export const createSociety = async (req, res) => {
   try {
@@ -47,7 +48,7 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
       societyGuards,
       projectReraNumber,
       createdBy: (await User.findOne({ uuid: createdBy?.uuid })) || (await User.findOne({email_addresses:createdBy.email_addresses
-      })) || (await User.findOne({phoneNumbers: createdBy.phoneNumbers}))
+      })) || (await User.findOne({phoneNumbers: createdBy.phoneNumbers}))  || (await createUser({body:createdBy}))._id
     };
 
     //Society creation
