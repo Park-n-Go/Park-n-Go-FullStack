@@ -17,6 +17,9 @@ const AddressSchema = new mongoose.Schema({
   landMark: { type: String },
 });
 
+
+
+
 const staffJobPositionEnum = ['indoor', 'outdoor', 'company office', 'main gate', 'others'];
 
 
