@@ -82,7 +82,7 @@ export const updateSociety = async (req, res) => {
       };
     }
 
-    const { id, projectReraNumber, ...reqDataWithOutReraNumber } = req.body;
+    const { societyID, projectReraNumber, ...reqDataWithOutReraNumber } = req.body;
 
     //merging two objects
     const societyObj = Object.assign({}, reqDataWithOutReraNumber, {
@@ -91,9 +91,9 @@ export const updateSociety = async (req, res) => {
         : req?.body?.projectReraNumber,
     });
 
-    const updatedSociety = await Society.findByIdAndUpdate(id, societyObj, {
+    const updatedSociety = await Society.findOneAndUpdate({societyID}, societyObj, {
       new: true
-    }).select(['-_id','-__v'])    ;
+    }).select(['-_id','-societyID','-__v'])    ;
 
 
     return { body: { updatedSociety }, status: { status: 200 } };
@@ -111,8 +111,8 @@ export const updateSociety = async (req, res) => {
 // Society deletion
 export const deleteSociety = async (req, res) => {
   try {
-    const society_data = req.body;
-    const society = await Society.findById(society_data.societyID);
+    const {societyID} = req.body;
+    const society = await Society.findOne({societyID});
     if (!society) {
       return {
         body: {
