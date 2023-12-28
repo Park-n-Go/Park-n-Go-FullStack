@@ -17,7 +17,7 @@ const AddressSchema = new mongoose.Schema({
   landMark: { type: String },
 });
 
-const staffJobPositionEnum = ['indoor', 'outdoor', 'society office', 'main gate', 'others'];
+const staffJobPositionEnum = ['indoor', 'outdoor', 'company office', 'main gate', 'others'];
 
 
 const projectReraNumberisVerifiedEnum = ['applied', 'pending', 'in-progress' ,'verified', 'unverified', 'failed verification'];
@@ -32,30 +32,30 @@ const ProjectReraNumberSchema= new mongoose.Schema(
   {number:{type:String},
   isVerified:{type:String,enum: {values: projectReraNumberisVerifiedEnum,message:'{VALUE} is not supported'},default:'pending'}})
 
-const SocietySchema = new mongoose.Schema(
-  { societyID:{type:String,required: true, unique :true},
-    societyName: {
+const CompanySchema = new mongoose.Schema(
+  { companyID:{type:String,required: true, unique},
+    companyName: {
       type: String,
       required: true,
       min: 2,
       max: 100,
     },
-    societyEntrancePicture: { type: String},
+    companyEntrancePicture: { type: String},
     officePhoneNumbers: [{ type: String, required: true }],
     builderName: { type: String, required: true },
     builderOfficeAddress: { type: AddressSchema, required: true },
-    societyAddress: { type: AddressSchema },
+    companyAddress: { type: AddressSchema },
     flates: [{ type: FlatSchema }],
-    societyMembers:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
-    societyStaffs: [{type:StaffSchema}],
-    societyGuards: [{type:StaffSchema}],
+    companyMembers:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
+    companyStaffs: [{type:StaffSchema}],
+    companyGuards: [{type:StaffSchema}],
     projectReraNumber:{type:ProjectReraNumberSchema},
     createdBy:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required:true }
   },
   { timestamps: true }
 );
 
-const Society =
-  mongoose?.models?.Society || mongoose.model("Society", SocietySchema);
+const company =
+  mongoose?.models?.Company || mongoose.model("Company", CompanySchema);
 
-export default Society;
+export default company;
