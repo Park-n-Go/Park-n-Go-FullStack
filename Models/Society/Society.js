@@ -33,7 +33,7 @@ const ProjectReraNumberSchema= new mongoose.Schema(
   isVerified:{type:String,enum: {values: projectReraNumberisVerifiedEnum,message:'{VALUE} is not supported'},default:'pending'}})
 
 const SocietySchema = new mongoose.Schema(
-  {
+  { societyID:{type:String,required: true},
     societyName: {
       type: String,
       required: true,
@@ -49,7 +49,8 @@ const SocietySchema = new mongoose.Schema(
     societyMembers:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
     societyStaffs: [{type:StaffSchema}],
     societyGuards: [{type:StaffSchema}],
-    projectReraNumber:{type:ProjectReraNumberSchema}
+    projectReraNumber:{type:ProjectReraNumberSchema},
+    createdBy:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required:true }
   },
   { timestamps: true }
 );

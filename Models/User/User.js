@@ -20,8 +20,9 @@ const UserSchema = new mongoose.Schema(
       required: false,
       min: 2,
       max: 100,
+      unique:true
     },
-    email_addresses: [{ type: String }],
+    email_addresses: [{ type: String, unique:true }],
     password: {
       type: String,
       required: false,
@@ -34,7 +35,7 @@ const UserSchema = new mongoose.Schema(
     vehicle_IDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" }],
 
     profilePicture: String,
-    phoneNumbers: [{ type: String }],
+    phoneNumbers: [{ type: String}],
 
     jobPosition: { type: String },
     company_ID: { type: String },

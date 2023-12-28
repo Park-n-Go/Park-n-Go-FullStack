@@ -1,21 +1,24 @@
 import User from "../../Models/User/User";
+import { v4 as uuidv4 } from "uuid";
 
 export const createUser = async (req, res) => {
   try {
     const user_data = req.body;
-    const user_check = await User.findOne({ uuid: user_data.id });
+
+    const user_check = (await User.findOne({ uuid: user_data?.id })) || (await User.findOne({email_addresses:user_data.email_addresses
+    })) || (await User.findOne({phoneNumbers: user_data.phoneNumbers}))
     //Check if User is already present
     if (user_check) {
       if (
-        user_check.email === user_data.email &&
+        user_check.email_addresses === user_data.email_addresses &&
         user_check.userName === user_data.userName
       ) {
         return {
-          body: { error_code: 400, error_message: "Stuff is already exist!" },
+          body: { error_code: 400, error_message: "User is already exist!" },
           status: { status: 400 },
         };
       }
-      if (user_check.email === user_data.email) {
+      if (user_check.email_addresses === user_data.email_addresses) {
         return {
           body: { error_code: 400, error_message: "Email is already exist!" },
           status: { status: 400 },
@@ -44,21 +47,28 @@ export const createUser = async (req, res) => {
         status: { status: 400 },
       };
     }
+    if (
+      (!user_data.email_addresses || !user_data.phoneNumbers) &&
+      (!Array.isArray(user_data.email_addresses) ||
+        !Array.isArray(user_data.phoneNumbers))
+    ) {
+      throw Error("Array of Email or Phone Number is required");
+    }
 
     const userObj = {
-      uuid: user_data.id,
+      uuid: user_data?.id || uuidv4(),
       firstName: user_data.first_name || null,
       lastName: user_data.last_name || null,
       email_addresses: user_data.email_addresses
         ? user_data.email_addresses?.map(
-            (email_addressesObj) => email_addressesObj?.email_address
-          )
+            (email_addressesObj) => {if(email_addressesObj?.email_address) { return (email_addressesObj?.email_address)} return (email_addressesObj)}
+          ) 
         : [],
-      phoneNumbers: user_data.phone_numbers
+      phoneNumbers: (user_data.phone_numbers
         ? user_data?.phone_numbers?.map(
-            (phoneNumberObj) => phoneNumberObj?.phone_number
-          )
-        : [],
+            (phoneNumberObj) => phoneNumberObj?.phone_number          
+          ) 
+        : user_data?.phoneNumbers) || [],
       // company_ID: stuff_company_ID._id,
       jobPosition: user_data?.jobPosition?.toUpperCase() || null,
       // vehicle_IDs: user_vehicles,
@@ -77,7 +87,7 @@ export const createUser = async (req, res) => {
     return {
       body: {
         error_code: 400,
-        error_message: error,
+        error_message: error.message,
       },
       status: { status: 400 },
     };
@@ -88,7 +98,7 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const user_data = req.body;
-    const user = await User.findOne({ uuid: user_data.id });
+    const user = await User.findOne({ uuid: user_data.uuid });
     if (!user) {
       return {
         body: {
@@ -133,7 +143,6 @@ export const updateUser = async (req, res) => {
       // vehicle_IDs: user_vehicles,
       role: user_data.role?.toUpperCase() || "user",
     };
-    console.log({ userObj });
     const updatedUser = await User.findOneAndUpdate(
       { uuid: user.uuid },
       userObj,

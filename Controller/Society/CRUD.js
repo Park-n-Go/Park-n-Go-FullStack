@@ -1,8 +1,10 @@
+import User from "@/Models/User/User";
 import Society from "../../Models/Society/Society";
 
 export const createSociety = async (req, res) => {
   try {
     const {
+      
       societyName,
       societyEntrancePicture,
       officePhoneNumbers,
@@ -14,9 +16,12 @@ export const createSociety = async (req, res) => {
       societyStaffs,
       societyGuards,
       projectReraNumber,
+      createdBy
     } = req.body;
-    const society_check = await Society.findOne({ projectReraNumber });
+const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNumbers[0]))
+      const society_check = await Society.findOne({societyID});
     //Check if Society is already present
+    
     if (society_check) {
       return {
         body: {
@@ -26,8 +31,10 @@ export const createSociety = async (req, res) => {
         status: { status: 400 },
       };
     }
+    
 
     const societyObj = {
+      societyID,
       societyName,
       societyEntrancePicture,
       officePhoneNumbers,
@@ -39,6 +46,8 @@ export const createSociety = async (req, res) => {
       societyStaffs,
       societyGuards,
       projectReraNumber,
+      createdBy: (await User.findOne({ uuid: createdBy?.uuid })) || (await User.findOne({email_addresses:createdBy.email_addresses
+      })) || (await User.findOne({phoneNumbers: createdBy.phoneNumbers}))
     };
 
     //Society creation
@@ -52,7 +61,7 @@ export const createSociety = async (req, res) => {
     return {
       body: {
         error_code: 400,
-        error_message: error,
+        error_message: error.message,
       },
       status: { status: 400 },
     };
@@ -62,7 +71,7 @@ export const createSociety = async (req, res) => {
 // Society updataion
 export const updateSociety = async (req, res) => {
   try {
-    const society_data = await Society.findById(req.body.id);
+    const society_data = await Society.findOne({societyID:req.body.societyID});
     if (!society_data) {
       return {
         body: {
