@@ -4,14 +4,12 @@ import { v4 as uuidv4 } from "uuid";
 export const createUser = async (req, res) => {
   try {
     const user_data = req.body;
-
-    const user_check = (await User.findOne({ uuid: user_data?.id })) || (await User.findOne({email_addresses:user_data.email_addresses
+    const user_check = (await User.findOne({ userID: user_data?.id })) || (await User.findOne({email_addresses:user_data.email_addresses
     })) || (await User.findOne({phoneNumbers: user_data.phoneNumbers}))
     //Check if User is already present
     if (user_check) {
       if (
-        user_check.email_addresses === user_data.email_addresses &&
-        user_check.userName === user_data.userName
+        user_check.email_addresses === user_data.email_addresses 
       ) {
         return {
           body: { error_code: 400, error_message: "User is already exist!" },
@@ -56,9 +54,9 @@ export const createUser = async (req, res) => {
     }
 
     const userObj = {
-      uuid: user_data?.id || uuidv4(),
-      firstName: user_data.first_name || null,
-      lastName: user_data.last_name || null,
+      userID: user_data?.id || user_data?.userID || uuidv4(),
+      firstName: user_data.first_name || user_data.firstName || null,
+      lastName: user_data.last_name || user_data.lastName || null,
       email_addresses: user_data.email_addresses
         ? user_data.email_addresses?.map(
             (email_addressesObj) => {if(email_addressesObj?.email_address) { return (email_addressesObj?.email_address)} return (email_addressesObj)}
@@ -72,7 +70,7 @@ export const createUser = async (req, res) => {
       // company_ID: stuff_company_ID._id,
       jobPosition: user_data?.jobPosition?.toUpperCase() || null,
       // vehicle_IDs: user_vehicles,
-      role: user_data.role?.toUpperCase() || null,
+      role: user_data.role?.toUpperCase() || 'User',
     };
 
     //User creation
@@ -98,7 +96,7 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const user_data = req.body;
-    const user = await User.findOne({ uuid: user_data.uuid });
+    const user = await User.findOne({ userID: user_data.userID });
     if (!user) {
       return {
         body: {
@@ -144,7 +142,7 @@ export const updateUser = async (req, res) => {
       role: user_data.role?.toUpperCase() || "user",
     };
     const updatedUser = await User.findOneAndUpdate(
-      { uuid: user.uuid },
+      { userID: user.userID },
       userObj,
       {
         new: true,
@@ -167,7 +165,7 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const user_data = req.body;
-    const user = await User.findOne({ uuid: user_data.uuid });
+    const user = await User.findOne({ userID: user_data.userID });
     if (!user) {
       return {
         body: {

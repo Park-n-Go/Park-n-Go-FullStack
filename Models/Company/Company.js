@@ -9,9 +9,6 @@ jobPosition:{type:String},
 providerName:{type:String}
 })
 
-const ProjectReraNumberSchema= new mongoose.Schema(
-  {number:{type:String},
-  isVerified:{type:String,enum: {values: projectReraNumberisVerifiedEnum,message:'{VALUE} is not supported'},default:'pending'}})
 
 const CompanySchema = new mongoose.Schema(
   { companyID:{type:String,required: true, unique},

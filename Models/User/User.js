@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+import { AddressSchema } from "../../Utils/Custom Schema Models/Address";
 
 const UserSchema = new mongoose.Schema(
   {
-    uuid: { type: String },
+    userID: { type: String },
     firstName: {
       type: String,
       required: false,
@@ -19,8 +20,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: false,
       min: 2,
-      max: 100,
-      unique:true
+      max: 100
     },
     email_addresses: [{ type: String, unique:true }],
     password: {
@@ -39,7 +39,7 @@ const UserSchema = new mongoose.Schema(
 
     jobPosition: { type: String },
     company_ID: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
-    address: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
+    address: { type: AddressSchema},
   },
   { timestamps: true }
 );

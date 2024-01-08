@@ -2,6 +2,45 @@ import User from "@/Models/User/User";
 import Society from "../../Models/Society/Society";
 import { createUser } from "../User/CRUD";
 
+
+const findOrCreateUser = async (userData) => {
+
+  try {
+if(Array.isArray(userData))  //Check input for array
+{
+  // Below we return array of user ids
+const findUser= Promise.all(userData.map(async (singleUserData) => {
+  
+ const user= (await User.findOne({ userID: singleUserData?.userID })) || (await User.findOne({email_addresses:singleUserData.email_addresses
+ })) ||  (await User.findOne({phoneNumbers: singleUserData.phoneNumbers})) 
+if(user){
+    return (user)
+}else{
+const result = await createUser({body:singleUserData})
+  return(result?.body)
+}
+
+
+}))
+return(await findUser)
+
+}
+
+//Below we return only single user id as string
+const user= (await User.findOne({userID:userData.userID})) || (await User.findOne({email_addresses:userData.email_addresses})) ||  (await User.findOne({phoneNumbers:userData.phoneNumbers})) 
+
+if(!user){
+  const result = await createUser({body:userData})
+  return(result?.body)
+}
+return (user)
+} catch (error) {
+    return(error.message)
+}
+
+}
+
+
 export const createSociety = async (req, res) => {
   try {
     const {
@@ -32,7 +71,7 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
         status: { status: 400 },
       };
     }
-    
+    console.log(createdBy)
 
     const societyObj = {
       societyID,
@@ -43,13 +82,10 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
       builderOfficeAddress,
       societyAddress,
       flates,
-      societyMembers,
-      societyStaffs,
-      societyGuards,
+      societyMembers: societyMembers ? await findOrCreateUser(societyMembers) : [],
+      societyGuards : societyGuards ?  await findOrCreateUser(societyGuards) : [],
       projectReraNumber,
-      createdBy: (await User.findOne({ uuid: createdBy?.uuid })) || (await User.findOne({email_addresses:createdBy.email_addresses
-      })) || (await User.findOne({phoneNumbers: createdBy.phoneNumbers}))  || (await createUser({body:createdBy}))._id
-    };
+      createdBy: createdBy ? await findOrCreateUser(createdBy) || null : null };
 
     //Society creation
     const society = new Society(societyObj);
@@ -125,6 +161,26 @@ export const deleteSociety = async (req, res) => {
     }
     await Society.findByIdAndDelete(society._id);
     return { body: { isDeleted: true }, status: { status: 200 } };
+  } catch (error) {
+    return {
+      body: {
+        error_code: 400,
+        error_message: `Error message - ${error}`,
+      },
+      status: { status: 400 },
+    };
+  }
+};
+
+
+
+
+// GET ALL Society
+export const getSocieties = async (req,res) => {
+  try {
+   
+    const societies = await Society.find()
+    return { body: {societies}, status: { status: 200 } };
   } catch (error) {
     return {
       body: {

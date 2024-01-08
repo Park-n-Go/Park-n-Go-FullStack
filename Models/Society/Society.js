@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { AddressSchema } from "../../Utils/Custom Schema Models/Address";
 
 const FlatSchema = new mongoose.Schema({
   type: { type: String, required: true },
@@ -34,10 +35,10 @@ const SocietySchema = new mongoose.Schema(
     societyEntrancePicture: { type: String},
     officePhoneNumbers: [{ type: String, required: true }],
     builderName: { type: String, required: true },
-    builderOfficeAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
-    societyAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address"},
+    builderOfficeAddress: { type: AddressSchema },
+    societyAddress: {type: AddressSchema},
     flates: [{ type: FlatSchema }],
-    societyMembers:[[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]],
+    societyMembers:[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     societyStaffs: [{type:StaffSchema}],
     societyGuards: [{type:StaffSchema}],
     projectReraNumber:{type:ProjectReraNumberSchema},
