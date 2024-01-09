@@ -10,14 +10,16 @@ if(Array.isArray(userData))  //Check input for array
 {
   // Below we return array of user ids
 const findUser= Promise.all(userData.map(async (singleUserData) => {
-  
- const user= (await User.findOne({ userID: singleUserData?.userID })) || (await User.findOne({email_addresses:singleUserData.email_addresses
- })) ||  (await User.findOne({phoneNumbers: singleUserData.phoneNumbers})) 
+  const jobCategory=singleUserData?.jobCategory
+  const jobPosition=singleUserData?.jobPosition
+  const providerName=singleUserData?.providerName
+ const user= (await User.findOne({ userID: singleUserData?.worker?.userID })) || (await User.findOne({email_addresses:singleUserData?.worker?.email_addresses
+ })) ||  (await User.findOne({phoneNumbers: singleUserData?.worker?.phoneNumbers})) 
 if(user){
-    return (user)
+    return ({worker:user,jobCategory,jobPosition,providerName})
 }else{
-const result = await createUser({body:singleUserData})
-  return(result?.body)
+const result = await createUser({body:singleUserData?.worker})
+  return({worker:result?.body,jobCategory,jobPosition,providerName})
 }
 
 
@@ -27,13 +29,16 @@ return(await findUser)
 }
 
 //Below we return only single user id as string
-const user= (await User.findOne({userID:userData.userID})) || (await User.findOne({email_addresses:userData.email_addresses})) ||  (await User.findOne({phoneNumbers:userData.phoneNumbers})) 
-
+const user= (await User.findOne({userID:userData?.worker?.userID})) || (await User.findOne({email_addresses:userData?.worker?.email_addresses})) ||  (await User.findOne({phoneNumbers:userData?.worker?.phoneNumbers})) 
+const jobCategory=userData?.jobCategory
+  const jobPosition=userData?.jobPosition
+  
+  const providerName=userData?.providerName
 if(!user){
-  const result = await createUser({body:userData})
-  return(result?.body)
+  const result = await createUser({body:userData?.worker})
+  return({worker:result?.body,jobCategory,jobPosition,providerName})
 }
-return (user)
+return ({worker:user,jobCategory,jobPosition,providerName})
 } catch (error) {
     return(error.message)
 }
@@ -71,7 +76,6 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
         status: { status: 400 },
       };
     }
-    console.log(createdBy)
 
     const societyObj = {
       societyID,
@@ -82,12 +86,13 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
       builderOfficeAddress,
       societyAddress,
       flates,
-      societyMembers: societyMembers ? await findOrCreateUser(societyMembers) : [],
-      societyGuards : societyGuards ?  await findOrCreateUser(societyGuards) : [],
+      societyMembers: societyMembers ? await findOrCreateUser(societyMembers) || [] : [],
+      societyGuards : societyGuards ?  await findOrCreateUser(societyGuards) || [] : [],
       projectReraNumber,
-      createdBy: createdBy ? await findOrCreateUser(createdBy) || null : null };
+      createdBy: createdBy ? await findOrCreateUser({worker: createdBy}) || null : null };
 
     //Society creation
+    console.log(JSON.stringify(societyObj))
     const society = new Society(societyObj);
     await society.save();
     const society_res = await Society.findById(society._id, {_id:0,

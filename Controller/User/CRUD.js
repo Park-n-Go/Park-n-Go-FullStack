@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 export const createUser = async (req, res) => {
   try {
     const user_data = req.body;
+    console.log({user_data})
     const user_check = (await User.findOne({ userID: user_data?.id })) || (await User.findOne({email_addresses:user_data.email_addresses
     })) || (await User.findOne({phoneNumbers: user_data.phoneNumbers}))
     //Check if User is already present
