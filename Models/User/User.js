@@ -9,12 +9,22 @@ const UserSchema = new mongoose.Schema(
       required: false,
       min: 2,
       max: 100,
+      set: value => {const removedWhiteSpace=value.replace(/\s/g, '').trim();
+      const titleCase = removedWhiteSpace.charAt(0).toUpperCase() +
+      removedWhiteSpace.substr(1).toLowerCase()
+    return (titleCase)
+    }
     },
     lastName: {
       type: String,
       required: false,
       min: 2,
       max: 100,
+      set: value => {const removedWhiteSpace=value.replace(/\s/g, '').trim();
+      const titleCase = removedWhiteSpace.charAt(0).toUpperCase() +
+      removedWhiteSpace.substr(1).toLowerCase()
+    return (titleCase)
+    }
     },
     userName: {
       type: String,
@@ -30,6 +40,7 @@ const UserSchema = new mongoose.Schema(
     pngRole: {
       type: String,
       default: "User",
+      set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()
     },
     vehicleIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" }],
 
@@ -39,7 +50,8 @@ const UserSchema = new mongoose.Schema(
     company: {
       companyID: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
       companyEmployee:{isCompanyEmployees: {
-        type: Boolean},jobPosition: { type: String },companyRole:{type:String}},
+        type: Boolean},jobPosition: { type: String,set: value => value?.toUpperCase() },companyRole:{type:String,
+          set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}},
       
         isCompanyStaff: { type: Boolean },
         isCompanyGuards: { type: Boolean },
@@ -53,18 +65,13 @@ const UserSchema = new mongoose.Schema(
       isSocietyMembers: { type: String },
       isSocietyStaffs: { type: Boolean },
       isSocietyGuards: { type: Boolean },
-      societyRole:{type:String}
+      societyRole:{type:String,
+        set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}
     },
   },
   { timestamps: true }
 );
 
-UserSchema.pre('save', function (next) {
-  // this?.company?.companyEmployee?.jobPosition = this?.company?.companyEmployee?.jobPosition?.toUpperCase();
-console.log(this)
-
-  next();
-});
 
 
 const User = mongoose?.models?.User || mongoose.model("User", UserSchema);

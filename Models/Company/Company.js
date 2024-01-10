@@ -38,7 +38,7 @@ const CompanySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-    },
+    },companyRoles:[{type:String,unique:true}]
   },
   { timestamps: true }
 );
