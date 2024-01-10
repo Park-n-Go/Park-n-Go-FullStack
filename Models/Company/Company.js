@@ -1,29 +1,28 @@
 import mongoose from "mongoose";
 import { WorkerSchema } from "../../Utils/CustomSchemaModels/Worker";
 import { ParkingRateSchema } from "@/Utils/CustomSchemaModels/ParkingRate";
+import { AddressSchema } from "@/Utils/CustomSchemaModels/Address";
 
 const CompanySchema = new mongoose.Schema(
   {
-    companyID: { type: String, required: true, unique },
+    companyID: { type: String, required: true, unique:true },
     companyName: {
       type: String,
       required: true,
       min: 2,
       max: 100,
     },
-    companyOfficeEmail: { type: String, required: true, unique: true },
+    companyOfficeEmail: [{ type: String, required: true, unique: true }],
     companyProfilePicture: { type: String },
     officePhoneNumbers: [{ type: String, required: true }],
     buildingName: { type: String, required: true },
-    headOfficeAddress: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
+    headOfficeAddress: { type: AddressSchema},
     companyAddress: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
-      required: true,
+      type: AddressSchema
     },
 
     companyEmployees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    comapnyStaff: [{ type: WorkerSchema }],
+    companyStaff: [{ type: WorkerSchema }],
     companyGuards: [{ type: WorkerSchema }],
     companyLocation: { type: String },
     subcription: {

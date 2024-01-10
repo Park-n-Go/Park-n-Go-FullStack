@@ -1,7 +1,7 @@
-import User from "@/Models/User/User";
+import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObjectForArrayOfMongoDBIDForUser";
 import Company from "../../Models/Company/Company";
-import { createUser } from "../User/CRUD";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
+import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
 
 export const createCompany = async (req, res) => {
   try {
@@ -40,6 +40,7 @@ export const createCompany = async (req, res) => {
     }
 
     const companyObj = {
+      companyID,
       companyName,
       companyOfficeEmail,
       companyProfilePicture,
@@ -68,14 +69,12 @@ export const createCompany = async (req, res) => {
       parkingRate,
       createdBy: createdBy ? (await findOrCreateUser(createdBy)) || null : null,
     };
-
     //Company creation
     const company = new Company(companyObj);
     await company.save();
     const company_res = await Company.findById(company._id, {
       _id: 0,
       __v: 0,
-      _id: 0,
     });
     return { body: company_res, status: { status: 201 } };
   } catch (error) {
@@ -92,37 +91,68 @@ export const createCompany = async (req, res) => {
 // Company updataion
 export const updateCompany = async (req, res) => {
   try {
+
+    const payload = { ...req?.body };
+    const originalRequest = {...req?.body}
+
+    const updatedRequest = removeKeyValuePairsFromAnObject(originalRequest, [
+      "companyID",
+      "_id",
+      "createdBy"
+    ]);
+
+    if (Object.keys(updatedRequest).length === 0) {
+      return {
+        body: {
+          error_code: 404,
+          error_message: "No Payload!",
+        },
+        status: { status: 404 },
+      };
+    }
+
     const company_data = await Company.findOne({
-      companyID: req.body.companyID,
+      companyID: payload.companyID,
     });
     if (!company_data) {
       return {
         body: {
           error_code: 404,
-          error_message: "Company Not Found",
+          error_message: "Company Not Found!",
         },
         status: { status: 400 },
       };
     }
 
-    // const { companyID, gstNumber, ...reqDataWithOutReraNumber } = req.body;
+    
 
-    // //merging two objects
-    // const companyObj = Object.assign({}, reqDataWithOutReraNumber, {
-    //   gstNumber: company_data?.gstNumber
-    //     ? company_data.gstNumber
-    //     : req?.body?.gstNumber,
-    // });
 
     const updatedCompany = await Company.findOneAndUpdate(
-      { companyID: req.body.companyID },
-      req.body,
+      { companyID: payload.companyID },
+      
+    removeNullValueFromAnObject({
+          ...updatedRequest
+                  ,companyEmployees: payload.companyEmployees
+            ? (
+                await findOrCreateUser(
+                  payload.companyEmployees?.map((employee) => ({ worker: employee }))
+                )
+              ).map((employee) => employee?.worker) || null
+            : null,
+            companyGuards: payload.companyGuards
+            ? (await findOrCreateUser(payload.companyGuards)) || null
+            : null,
+            comapnyStaff: payload.comapnyStaff
+            ? (await findOrCreateUser(payload.comapnyStaff)) || null
+            : null,
+        })
+      ,
       {
         new: true,
       }
-    ).select(["-_id", "-companyID", "-__v"]);
+    ).select(["-_id", "-__v"]);
 
-    return { body: { updatedCompany }, status: { status: 200 } };
+    return { body: { updatedCompanyData:updatedCompany,priviousCompanyData:company_data }, status: { status: 200 } };
   } catch (error) {
     return {
       body: {
@@ -137,13 +167,24 @@ export const updateCompany = async (req, res) => {
 // Company deletion
 export const deleteCompany = async (req, res) => {
   try {
+
+    if (Object.keys(req.body).length === 0) {
+      return {
+        body: {
+          error_code: 404,
+          error_message: "No Payload!",
+        },
+        status: { status: 404 },
+      };
+    }
+
     const { companyID } = req.body;
     const company = await Company.findOne({ companyID });
     if (!company) {
       return {
         body: {
           error_code: 404,
-          error_message: "Company Not Found",
+          error_message: "Company Not Found!",
         },
         status: { status: 400 },
       };

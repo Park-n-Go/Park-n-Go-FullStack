@@ -1,6 +1,7 @@
-import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObject";
+import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObjectForArrayOfMongoDBIDForUser";
 import Society from "../../Models/Society/Society";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
+import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
 
 export const createSociety = async (req, res) => {
   try {
@@ -104,21 +105,42 @@ export const updateSociety = async (req, res) => {
       return {
         body: {
           error_code: 404,
-          error_message: "Society Not Found",
+          error_message: "Society Not Found!",
         },
         status: { status: 404 },
       };
     }
 
+
+
+
     const updatedSociety = await Society.findOneAndUpdate(
       { societyID: payload?.societyID },
-      updatedRequest,
+
+      removeNullValueFromAnObject({
+          ...updatedRequest
+                  ,societyMembers: payload.societyMembers
+            ? (
+                await findOrCreateUser(
+                  payload.societyMembers.map((member) => ({ worker: member }))
+                )
+              ).map((member) => member?.worker) || null
+            : null,
+          societyGuards: payload.societyGuards
+            ? (await findOrCreateUser(payload.societyGuards)) || null
+            : null,
+          societyStaffs: payload.societyStaffs
+            ? (await findOrCreateUser(payload.societyStaffs)) || null
+            : null,
+        })
+
+      ,
       {
         new: true,
       }
     ).select(["-_id", "-__v"]);
 
-    return { body: { updatedSociety }, status: { status: 200 } };
+    return { body: { updatedSocietyData:updatedSociety,priviousSocietyData:society_data}, status: { status: 200 } };
   } catch (error) {
     return {
       body: {
@@ -133,13 +155,24 @@ export const updateSociety = async (req, res) => {
 // Society deletion
 export const deleteSociety = async (req, res) => {
   try {
+
+    if (Object.keys(req.body).length === 0) {
+      return {
+        body: {
+          error_code: 404,
+          error_message: "No Payload!",
+        },
+        status: { status: 404 },
+      };
+    }
+
     const { societyID } = req.body;
     const society = await Society.findOne({ societyID });
     if (!society) {
       return {
         body: {
           error_code: 404,
-          error_message: "Society Not Found",
+          error_message: "Society Not Found!",
         },
         status: { status: 400 },
       };

@@ -1,5 +1,7 @@
+import { UNSTABLE_REVALIDATE_RENAME_ERROR } from "next/dist/lib/constants";
 import User from "../../Models/User/User";
 import { v4 as uuidv4 } from "uuid";
+import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
 
 export const createUser = async (req, res) => {
   try {
@@ -55,6 +57,7 @@ export const createUser = async (req, res) => {
 
     const userObj = {
       userID: user_data?.id || user_data?.userID || uuidv4(),
+      userName:user_data?.userName || (user_data?.firstName.slice(0,1)+user_data?.lastName) || null,
       firstName: user_data?.first_name || user_data?.firstName || null,
       lastName: user_data?.last_name || user_data?.lastName || null,
       email_addresses: user_data?.email_addresses
@@ -67,9 +70,14 @@ export const createUser = async (req, res) => {
             (phoneNumberObj) => phoneNumberObj?.phone_number          
           ) 
         : user_data?.phoneNumbers) || [],
-      jobPosition: user_data?.jobPosition?.toUpperCase() || null,
-      // vehicle_IDs: user_vehicles,
-      role: user_data.role?.toUpperCase() || 'User',
+        company: user_data?.company,
+        vehicleIDs: user_data?.vehicleIDs,
+        profilePicture: user_data?.profilePicture,
+        userAddress:user_data?.userAddress,
+        society:user_data?.society,
+        password:user_data?.password,
+        
+        pngRole: user_data?.pngRole?.toUpperCase() || 'User',
     };
     //User creation
     const user = new User(userObj);
@@ -93,61 +101,66 @@ export const createUser = async (req, res) => {
 // User updataion
 export const updateUser = async (req, res) => {
   try {
-    const user_data = req.body;
-    const user = await User.findOne({ userID: user_data.userID });
-    if (!user) {
+    
+    const payload = { ...req?.body };
+    const originalRequest = { ...payload };
+
+    if (Object.keys(payload).length === 0) {
       return {
         body: {
           error_code: 404,
-          error_message: "User Not Found",
+          error_message: "No Payload!",
         },
-        status: { status: 400 },
+        status: { status: 404 },
       };
     }
-
-    const userObj = {
-      firstName: user_data.first_name,
-      lastName: user_data.last_name,
+    
+    const user_data = await User.findOne({
+      userName: payload?.userName,
+    }) || await User.findOne({
+      userID: payload?.userID,
+    }) || await User.findById(payload?.id) || await User.findById(payload?.userID) || await User.findById(payload?._id) || null
+    
+    if (!user_data) {
+      return {
+        body: {
+          error_code: 404,
+          error_message: "User Not Found!",
+        },
+        status: { status: 404 },
+      };
+    }
+ 
+    const userObj = removeNullValueFromAnObject({
+      firstName: payload?.first_name || payload?.firstName || null,
+      lastName: payload?.last_name || payload?.lastName || null,
       email_addresses:
-        user.email_addresses.length > 0
-          ? [
-              ...new Set([
-                ...user.email_addresses,
-                ...user_data.email_addresses?.map(
-                  (email_addressesObj) => email_addressesObj?.email_address
-                ),
-              ]),
-            ]
-          : user_data.email_addresses?.map(
-              (email_addressesObj) => email_addressesObj?.email_address
-            ),
+      payload.email_addresses.length > 0
+          ? (payload.email_addresses || null)
+          :  null ,
       phoneNumbers:
-        user.phoneNumbers.length > 0
-          ? [
-              ...new Set([
-                ...user.phoneNumbers,
-                ...user_data?.phone_numbers?.map(
-                  (phoneNumberObj) => phoneNumberObj?.phone_number
-                ),
-              ]),
-            ]
-          : user_data?.phone_numbers?.map(
-              (phoneNumberObj) => phoneNumberObj?.phone_number
-            ),
-      // company_ID: stuff_company_ID._id,
-      jobPosition: user_data?.jobPosition?.toUpperCase(),
-      // vehicle_IDs: user_vehicles,
-      role: user_data.role?.toUpperCase() || "user",
-    };
+      payload.phoneNumbers.length > 0
+          ? (payload.phoneNumbers || null)
+          : null,
+          company: payload?.company || null,
+      vehicleIDs: payload?.vehicleIDs || null,
+      pngRole: payload?.pngRole || null,
+      society:payload?.society || null,
+      userAddress:payload?.userAddress || null,
+      profilePicture:payload?.profilePicture || null,
+      userAddress:payload?.userAddress || null,
+      userName: payload?.userName || null
+
+    });
     const updatedUser = await User.findOneAndUpdate(
-      { userID: user.userID },
+      { userID: user_data.userID },
       userObj,
       {
         new: true,
       }
     );
 
-    return { body: { updatedUser }, status: { status: 200 } };
+    return { body: { updatedUserData:updatedUser,priviousUserData: user_data }, status: { status: 200 } };
   } catch (error) {
     return {
       body: {
@@ -162,18 +175,38 @@ export const updateUser = async (req, res) => {
 // User deletion
 export const deleteUser = async (req, res) => {
   try {
-    const user_data = req.body;
-    const user = await User.findOne({ userID: user_data.userID });
-    if (!user) {
+
+    const payload = { ...req?.body };
+
+    if (Object.keys(payload).length === 0) {
       return {
         body: {
           error_code: 404,
-          error_message: "User Not Found",
+          error_message: "No Payload!",
         },
-        status: { status: 400 },
+        status: { status: 404 },
       };
     }
-   await User.findByIdAndDelete(user._id);
+    
+    const user_data = await User.findOne({
+      userName: payload?.userName,
+    }) || await User.findOne({
+      userID: payload?.userID,
+    }) || await User.findById(payload?.id) || await User.findById(payload?.userID) || await User.findById(payload?._id) || null
+    
+    if (!user_data) {
+      return {
+        body: {
+          error_code: 404,
+          error_message: "User Not Found!",
+        },
+        status: { status: 404 },
+      };
+    }
+
+
+    
+   await User.findByIdAndDelete(user_data._id);
    return { body: { isDeleted: true }, status: { status: 200 } };
   } catch (error) {
     return {
