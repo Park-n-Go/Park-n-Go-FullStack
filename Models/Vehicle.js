@@ -7,23 +7,21 @@ const VehicleSchema = new mongoose.Schema(
       required: true,
       min: 2,
       max: 100,
+      uiniqe:true
     },
     ownerName: {
       type: String,
-      required: true,
       min: 2,
       max: 100,
     },
     ownerType: {
       type: String,
-      required: true,
     },
     vehiclePicture: {
       type: String,
     },
     vehicleType: {
       type: String,
-      required: true,
       min: 5,
     },
     userID: {
@@ -31,7 +29,7 @@ const VehicleSchema = new mongoose.Schema(
       ref: "User",
     },
     fasTagID: {
-      type: String,
+      type: String,uiniqe:true
     },
     mobile: Number,
   },

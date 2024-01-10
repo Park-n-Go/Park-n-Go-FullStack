@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { WorkerSchema } from "../../Utils/CustomSchemaModels/Worker";
+import { ParkingRateSchema } from "@/Utils/CustomSchemaModels/ParkingRate";
 
 const CompanySchema = new mongoose.Schema(
   {
@@ -33,6 +34,7 @@ const CompanySchema = new mongoose.Schema(
     enrollmentDate: { type: String },
     companyGSTNumber: { type: String, required: true, unique: true },
     companyPANNumber: { type: String, required: true, unique: true },
+    parkingRate: {type: ParkingRateSchema },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -1,32 +1,34 @@
 import User from "@/Models/User/User";
 import Company from "../../Models/Company/Company";
 import { createUser } from "../User/CRUD";
+import { findOrCreateUser } from "@/Utils/findOrCreateUser";
 
 export const createCompany = async (req, res) => {
   try {
     const {
-      
-companyName,
-companyOfficeEmail,
-companyProfilePicture,
-officePhoneNumbers,
-buildingName,
-headOfficeAddress,
-companyAddress,
-companyEmployees,
-staffs,
-companyGuards,
-companyLocation,
-subcriptionTaken,
-subcriptionValidity,
-enrollmentDate,
-gstNumber,
-createdBy
+      companyName,
+      companyOfficeEmail,
+      companyProfilePicture,
+      officePhoneNumbers,
+      buildingName,
+      headOfficeAddress,
+      companyAddress,
+      companyEmployees,
+      comapnyStaff,
+      companyGuards,
+      companyLocation,
+      subcription,
+      enrollmentDate,
+      companyGSTNumber,
+      companyPANNumber,
+      parkingRate,
+      createdBy,
     } = req.body;
-const companyID = ((companyName.replace(/\s/g, '').toLowerCase())+(officePhoneNumbers[0]))
-      const company_check = await Company.findOne({companyID});
+    const companyID =
+      companyName.replace(/\s/g, "").toLowerCase() + officePhoneNumbers[0];
+    const company_check = await Company.findOne({ companyID });
     //Check if Company is already present
-    
+
     if (company_check) {
       return {
         body: {
@@ -36,10 +38,8 @@ const companyID = ((companyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
         status: { status: 400 },
       };
     }
-    
 
-    const companyObj ={
-      
+    const companyObj = {
       companyName,
       companyOfficeEmail,
       companyProfilePicture,
@@ -47,27 +47,35 @@ const companyID = ((companyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
       buildingName,
       headOfficeAddress,
       companyAddress,
-      companyEmployees,
-      staffs,
-      companyGuards,
+      companyEmployees: companyEmployees
+        ? (
+            await findOrCreateUser(
+              companyEmployees.map((employee) => ({ worker: employee }))
+            )
+          ).map((employee) => employee?.worker) || []
+        : [],
+      comapnyStaff: comapnyStaff
+        ? (await findOrCreateUser(comapnyStaff)) || []
+        : [],
+      companyGuards: companyGuards
+        ? (await findOrCreateUser(companyGuards)) || []
+        : [],
       companyLocation,
-      subcriptionTaken,
-      subcriptionValidity,
+      subcription,
       enrollmentDate,
-      gstNumber,
-      createdBy: (await User.findOne({ uuid: createdBy?.uuid })) || (await User.findOne({email_addresses:createdBy.email_addresses
-      })) || (await User.findOne({phoneNumbers: createdBy.phoneNumbers})) || (await createUser({body:createdBy}))._id
-   
-          }
-    
- 
+      companyGSTNumber,
+      companyPANNumber,
+      parkingRate,
+      createdBy: createdBy ? (await findOrCreateUser(createdBy)) || null : null,
+    };
 
     //Company creation
     const company = new Company(companyObj);
     await company.save();
-    const company_res = await Company.findById(company._id, {_id:0,
+    const company_res = await Company.findById(company._id, {
+      _id: 0,
       __v: 0,
-      _id:0
+      _id: 0,
     });
     return { body: company_res, status: { status: 201 } };
   } catch (error) {
@@ -84,7 +92,9 @@ const companyID = ((companyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
 // Company updataion
 export const updateCompany = async (req, res) => {
   try {
-    const company_data = await Company.findOne({companyID:req.body.companyID});
+    const company_data = await Company.findOne({
+      companyID: req.body.companyID,
+    });
     if (!company_data) {
       return {
         body: {
@@ -95,19 +105,22 @@ export const updateCompany = async (req, res) => {
       };
     }
 
-    const { companyID, gstNumber, ...reqDataWithOutReraNumber } = req.body;
+    // const { companyID, gstNumber, ...reqDataWithOutReraNumber } = req.body;
 
-    //merging two objects
-    const companyObj = Object.assign({}, reqDataWithOutReraNumber, {
-      gstNumber: company_data?.gstNumber
-        ? company_data.gstNumber
-        : req?.body?.gstNumber,
-    });
+    // //merging two objects
+    // const companyObj = Object.assign({}, reqDataWithOutReraNumber, {
+    //   gstNumber: company_data?.gstNumber
+    //     ? company_data.gstNumber
+    //     : req?.body?.gstNumber,
+    // });
 
-    const updatedCompany = await Company.findOneAndUpdate({companyID}, companyObj, {
-      new: true
-    }).select(['-_id','-companyID','-__v'])    ;
-
+    const updatedCompany = await Company.findOneAndUpdate(
+      { companyID: req.body.companyID },
+      req.body,
+      {
+        new: true,
+      }
+    ).select(["-_id", "-companyID", "-__v"]);
 
     return { body: { updatedCompany }, status: { status: 200 } };
   } catch (error) {
@@ -124,8 +137,8 @@ export const updateCompany = async (req, res) => {
 // Company deletion
 export const deleteCompany = async (req, res) => {
   try {
-    const {companyID} = req.body;
-    const company = await Company.findOne({companyID});
+    const { companyID } = req.body;
+    const company = await Company.findOne({ companyID });
     if (!company) {
       return {
         body: {
