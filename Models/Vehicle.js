@@ -26,11 +26,11 @@ const VehicleSchema = new mongoose.Schema(
       required: true,
       min: 5,
     },
-    staff_ID: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    fasTag_ID: {
+    fasTagID: {
       type: String,
     },
     mobile: Number,
@@ -38,5 +38,5 @@ const VehicleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// const Vehicle = mongoose.model("Vehicle", VehicleSchema);
-// export default Vehicle;
+const Vehicle = mongoose.model("Vehicle", VehicleSchema);
+export default Vehicle;

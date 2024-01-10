@@ -3,21 +3,20 @@ import { v4 as uuidv4 } from "uuid";
 
 export const createUser = async (req, res) => {
   try {
-    const user_data = req.body;
-    console.log({user_data})
-    const user_check = (await User.findOne({ userID: user_data?.id })) || (await User.findOne({email_addresses:user_data.email_addresses
-    })) || (await User.findOne({phoneNumbers: user_data.phoneNumbers}))
+    const user_data = req?.body;
+    const user_check = (await User.findOne({ userID: user_data?.id })) || (await User.findOne({email_addresses:user_data?.email_addresses
+    })) || (await User.findOne({phoneNumbers: user_data?.phoneNumbers}))
     //Check if User is already present
     if (user_check) {
       if (
-        user_check.email_addresses === user_data.email_addresses 
+        user_check?.email_addresses === user_data?.email_addresses 
       ) {
         return {
           body: { error_code: 400, error_message: "User is already exist!" },
           status: { status: 400 },
         };
       }
-      if (user_check.email_addresses === user_data.email_addresses) {
+      if (user_check?.email_addresses === user_data?.email_addresses) {
         return {
           body: { error_code: 400, error_message: "Email is already exist!" },
           status: { status: 400 },
@@ -47,33 +46,31 @@ export const createUser = async (req, res) => {
       };
     }
     if (
-      (!user_data.email_addresses || !user_data.phoneNumbers) &&
-      (!Array.isArray(user_data.email_addresses) ||
-        !Array.isArray(user_data.phoneNumbers))
+      (!user_data?.email_addresses || !user_data?.phoneNumbers) &&
+      (!Array.isArray(user_data?.email_addresses) ||
+        !Array.isArray(user_data?.phoneNumbers))
     ) {
       throw Error("Array of Email or Phone Number is required");
     }
 
     const userObj = {
       userID: user_data?.id || user_data?.userID || uuidv4(),
-      firstName: user_data.first_name || user_data.firstName || null,
-      lastName: user_data.last_name || user_data.lastName || null,
-      email_addresses: user_data.email_addresses
-        ? user_data.email_addresses?.map(
+      firstName: user_data?.first_name || user_data?.firstName || null,
+      lastName: user_data?.last_name || user_data?.lastName || null,
+      email_addresses: user_data?.email_addresses
+        ? user_data?.email_addresses?.map(
             (email_addressesObj) => {if(email_addressesObj?.email_address) { return (email_addressesObj?.email_address)} return (email_addressesObj)}
           ) 
         : [],
-      phoneNumbers: (user_data.phone_numbers
+      phoneNumbers: (user_data?.phone_numbers
         ? user_data?.phone_numbers?.map(
             (phoneNumberObj) => phoneNumberObj?.phone_number          
           ) 
         : user_data?.phoneNumbers) || [],
-      // company_ID: stuff_company_ID._id,
       jobPosition: user_data?.jobPosition?.toUpperCase() || null,
       // vehicle_IDs: user_vehicles,
       role: user_data.role?.toUpperCase() || 'User',
     };
-
     //User creation
     const user = new User(userObj);
     await user.save();

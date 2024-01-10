@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { AddressSchema } from "../../Utils/Custom Schema Models/Address";
+import { AddressSchema } from "../../Utils/CustomSchemaModels/Address";
+import { WorkerSchema } from "../../Utils/CustomSchemaModels/Worker";
 
 const FlatSchema = new mongoose.Schema({
   type: { type: String, required: true },
@@ -9,20 +10,11 @@ const FlatSchema = new mongoose.Schema({
 });
 
 
-const staffJobPositionEnum = ['indoor', 'outdoor', 'society office', 'main gate', 'others'];
 
-
-const projectReraNumberisVerifiedEnum = ['applied', 'pending', 'in-progress' ,'verified', 'unverified', 'failed verification'];
-
-const StaffSchema= new mongoose.Schema({ worker:{ type: mongoose.Schema.Types.ObjectId, ref: "User" },
-jobCategory:{type:String},
-jobPosition:{type:String, enum:staffJobPositionEnum, default:'others'},
-providerName:{type:String}
-})
 
 const ProjectReraNumberSchema= new mongoose.Schema(
   {number:{type:String},
-  isVerified:{type:String,enum: {values: projectReraNumberisVerifiedEnum,message:'{VALUE} is not supported'},default:'pending'}})
+  isVerified:{type:String}})
 
 const SocietySchema = new mongoose.Schema(
   { societyID:{type:String,required: true, unique :true},
@@ -39,8 +31,15 @@ const SocietySchema = new mongoose.Schema(
     societyAddress: {type: AddressSchema},
     flates: [{ type: FlatSchema }],
     societyMembers:[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    societyStaffs: [{type:StaffSchema}],
-    societyGuards: [{type:StaffSchema}],
+    societyStaffs: [{type:WorkerSchema}],
+    societyGuards: [{type:WorkerSchema}],
+    
+    subcription: {
+      subcriptionStatus: { type: String },
+      subcriptionTaken: { type: String },
+      subcriptionValidity: { type: String },
+    },
+    enrollmentDate: { type: String },
     projectReraNumber:{type:ProjectReraNumberSchema},
     createdBy:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required:true }
   },

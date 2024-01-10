@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AddressSchema } from "../../Utils/Custom Schema Models/Address";
+import { AddressSchema } from "../../Utils/CustomSchemaModels/Address";
 
 const UserSchema = new mongoose.Schema(
   {

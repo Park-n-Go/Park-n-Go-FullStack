@@ -29,16 +29,13 @@ return(await findUser)
 }
 
 //Below we return only single user id as string
-const user= (await User.findOne({userID:userData?.worker?.userID})) || (await User.findOne({email_addresses:userData?.worker?.email_addresses})) ||  (await User.findOne({phoneNumbers:userData?.worker?.phoneNumbers})) 
-const jobCategory=userData?.jobCategory
-  const jobPosition=userData?.jobPosition
-  
-  const providerName=userData?.providerName
-if(!user){
-  const result = await createUser({body:userData?.worker})
-  return({worker:result?.body,jobCategory,jobPosition,providerName})
+const user= (await User.findOne({userID:userData?.userID})) || (await User.findOne({email_addresses:userData?.email_addresses})) ||  (await User.findOne({phoneNumbers:userData?.phoneNumbers}))
+
+if(! (await user)){
+  const result = await createUser({body:userData})
+  return(result?.body)
 }
-return ({worker:user,jobCategory,jobPosition,providerName})
+return (await user)
 } catch (error) {
     return(error.message)
 }
@@ -86,13 +83,13 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
       builderOfficeAddress,
       societyAddress,
       flates,
-      societyMembers: societyMembers ? await findOrCreateUser(societyMembers) || [] : [],
+      societyMembers: societyMembers ? (await findOrCreateUser(societyMembers.map((member)=>({worker:member})))).map((member)=>(member?.worker)) || [] : [],
       societyGuards : societyGuards ?  await findOrCreateUser(societyGuards) || [] : [],
+      societyStaffs : societyStaffs ?  await findOrCreateUser(societyStaffs) || [] : [],
       projectReraNumber,
-      createdBy: createdBy ? await findOrCreateUser({worker: createdBy}) || null : null };
+      createdBy: createdBy ? await findOrCreateUser(createdBy) || null : null };
 
     //Society creation
-    console.log(JSON.stringify(societyObj))
     const society = new Society(societyObj);
     await society.save();
     const society_res = await Society.findById(society._id, {_id:0,
@@ -113,6 +110,7 @@ const societyID = ((societyName.replace(/\s/g, '').toLowerCase())+(officePhoneNu
 // Society updataion
 export const updateSociety = async (req, res) => {
   try {
+
     const society_data = await Society.findOne({societyID:req.body.societyID});
     if (!society_data) {
       return {
@@ -120,22 +118,22 @@ export const updateSociety = async (req, res) => {
           error_code: 404,
           error_message: "Society Not Found",
         },
-        status: { status: 400 },
+        status: { status: 404 },
       };
     }
 
-    const { societyID, projectReraNumber, ...reqDataWithOutReraNumber } = req.body;
+    // const { societyID, projectReraNumber, ...reqDataWithOutReraNumber } = req.body;
 
-    //merging two objects
-    const societyObj = Object.assign({}, reqDataWithOutReraNumber, {
-      projectReraNumber: society_data?.projectReraNumber
-        ? society_data.projectReraNumber
-        : req?.body?.projectReraNumber,
-    });
+    // //merging two objects
+    // const societyObj = Object.assign({}, reqDataWithOutReraNumber, {
+    //   projectReraNumber: society_data?.projectReraNumber
+    //     ? society_data.projectReraNumber
+    //     : req?.body?.projectReraNumber,
+    // });
 
-    const updatedSociety = await Society.findOneAndUpdate({societyID}, societyObj, {
+    const updatedSociety = await Society.findOneAndUpdate({societyID:req.body.societyID}, req.body, {
       new: true
-    }).select(['-_id','-societyID','-__v'])    ;
+    }).select(['-_id','-__v'])    ;
 
 
     return { body: { updatedSociety }, status: { status: 200 } };
