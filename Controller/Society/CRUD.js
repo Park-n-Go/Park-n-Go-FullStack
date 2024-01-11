@@ -2,6 +2,9 @@ import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFrom
 import Society from "../../Models/Society/Society";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
 import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
+import SocietyRole from "@/Models/Role Models/Society_Role";
+
+const DEFAULTSOCIETYROLES = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'ANALYST', 'OUTTER_GUARD', 'INNER_GUARD', 'MAIN_GATE_GUARD', 'MAINTANCE_WORKER', 'TENENT', 'OWNER', 'SOCIETY_MEMBER', 'SOCIETY_CHAIRMAN', 'GUEST', 'MAID']
 
 export const createSociety = async (req, res) => {
   try {
@@ -18,6 +21,7 @@ export const createSociety = async (req, res) => {
       societyGuards,
       projectReraNumber,
       createdBy,
+      societyRoles 
     } = req.body;
     const societyID =
       societyName.replace(/\s/g, "").toLowerCase() + officePhoneNumbers[0];
@@ -33,6 +37,8 @@ export const createSociety = async (req, res) => {
         status: { status: 400 },
       };
     }
+
+const customRoles = ((societyRoles && societyRoles.length > 0) ? societyRoles : [] )
 
     const societyObj = {
       societyID,
@@ -58,6 +64,7 @@ export const createSociety = async (req, res) => {
         : [],
       projectReraNumber,
       createdBy: createdBy ? (await findOrCreateUser(createdBy)) || null : null,
+      societyRoles:[...DEFAULTSOCIETYROLES, ...(customRoles.map((customRole)=>(customRole?.trim()?.replace(/\s+/g, '_')?.trim()?.toUpperCase())))]
     };
 
     //Society creation
@@ -98,6 +105,8 @@ export const updateSociety = async (req, res) => {
       };
     }
 
+    const customRoles = ((payload.societyRoles && payload.societyRoles.length > 0) ? payload.societyRoles : [] )
+
     const society_data = await Society.findOne({
       societyID: payload.societyID,
     });
@@ -132,6 +141,7 @@ export const updateSociety = async (req, res) => {
           societyStaffs: payload.societyStaffs
             ? (await findOrCreateUser(payload.societyStaffs)) || null
             : null,
+            societyRoles:[...DEFAULTSOCIETYROLES,...(customRoles.map((customRole)=>(customRole?.trim()?.replace(/\s+/g, '_')?.trim()?.toUpperCase())))]
         })
 
       ,

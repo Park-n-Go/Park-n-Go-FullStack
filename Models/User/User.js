@@ -47,26 +47,27 @@ const UserSchema = new mongoose.Schema(
     profilePicture: { type: String },
     phoneNumbers: [{ type: String }],
 
-    company: {
+    companies: [{
       companyID: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
-      companyEmployee:{isCompanyEmployees: {
-        type: Boolean},jobPosition: { type: String,set: value => value?.toUpperCase() },companyRole:{type:String,
-          set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}},
+      companyEmployee:{isCompanyEmployee: {
+        type: Boolean},jobPosition: { type: String,set: value => value?.toUpperCase() }},
+        companyRoles:[{type:String,
+          set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}],
       
         isCompanyStaff: { type: Boolean },
         isCompanyGuards: { type: Boolean },
         
     
       
-    },
+    }],
     userAddress: { type: AddressSchema },
-    society: {
+    societies: {
       societyID: { type: mongoose.Schema.Types.ObjectId, ref: "Society" },
       isSocietyMembers: { type: String },
       isSocietyStaffs: { type: Boolean },
       isSocietyGuards: { type: Boolean },
-      societyRole:{type:String,
-        set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}
+      societyRoles:[{type:String,
+        set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}]
     },
   },
   { timestamps: true }

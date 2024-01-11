@@ -1,4 +1,3 @@
-import { UNSTABLE_REVALIDATE_RENAME_ERROR } from "next/dist/lib/constants";
 import User from "../../Models/User/User";
 import { v4 as uuidv4 } from "uuid";
 import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
@@ -70,11 +69,11 @@ export const createUser = async (req, res) => {
             (phoneNumberObj) => phoneNumberObj?.phone_number          
           ) 
         : user_data?.phoneNumbers) || [],
-        company: user_data?.company,
+        companies: user_data?.company,
         vehicleIDs: user_data?.vehicleIDs,
         profilePicture: user_data?.profilePicture,
         userAddress:user_data?.userAddress,
-        society:user_data?.society,
+        societies:user_data?.society,
         password:user_data?.password,
         
         pngRole: user_data?.pngRole?.toUpperCase() || 'User',
@@ -103,7 +102,6 @@ export const updateUser = async (req, res) => {
   try {
     
     const payload = { ...req?.body };
-    const originalRequest = { ...payload };
 
     if (Object.keys(payload).length === 0) {
       return {
@@ -145,7 +143,8 @@ export const updateUser = async (req, res) => {
           company: payload?.company || null,
       vehicleIDs: payload?.vehicleIDs || null,
       pngRole: payload?.pngRole || null,
-      society:payload?.society || null,
+      societies:payload?.societies || null,
+      companies:payload?.companies || null,
       userAddress:payload?.userAddress || null,
       profilePicture:payload?.profilePicture || null,
       userAddress:payload?.userAddress || null,

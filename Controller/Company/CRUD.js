@@ -2,6 +2,10 @@ import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFrom
 import Company from "../../Models/Company/Company";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
 import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
+import User from "@/Models/User/User";
+
+const DEFAULTCOMPANYROLES = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'ANALYST', 'OUTTER_GUARD', 'INNER_GUARD', 'MAIN_GATE_GUARD', 'MAINTANCE_WORKER', 'EMPLOYEE', 'OWNER', 'VISITOR', 'CLIENT', 'GUEST']
+
 
 export const createCompany = async (req, res) => {
   try {
@@ -23,6 +27,7 @@ export const createCompany = async (req, res) => {
       companyPANNumber,
       parkingRate,
       createdBy,
+      companyRoles
     } = req.body;
     const companyID =
       companyName.replace(/\s/g, "").toLowerCase() + officePhoneNumbers[0];
@@ -38,6 +43,10 @@ export const createCompany = async (req, res) => {
         status: { status: 400 },
       };
     }
+
+    const customRoles = ((companyRoles && companyRoles.length > 0) ? companyRoles : [] )
+
+
 
     const companyObj = {
       companyID,
@@ -55,7 +64,7 @@ export const createCompany = async (req, res) => {
             )
           ).map((employee) => employee?.worker) || []
         : [],
-      comapnyStaff: comapnyStaff
+      companyStaff: comapnyStaff
         ? (await findOrCreateUser(comapnyStaff)) || []
         : [],
       companyGuards: companyGuards
@@ -68,14 +77,37 @@ export const createCompany = async (req, res) => {
       companyPANNumber,
       parkingRate,
       createdBy: createdBy ? (await findOrCreateUser(createdBy)) || null : null,
+      companyRoles:[...DEFAULTCOMPANYROLES, ...(customRoles.map((customRole)=>(customRole?.trim()?.replace(/\s+/g, '_')?.trim()?.toUpperCase())))]
     };
     //Company creation
     const company = new Company(companyObj);
     await company.save();
     const company_res = await Company.findById(company._id, {
-      _id: 0,
-      __v: 0,
+       __v: 0,
     });
+const companyCreatedByUser = await User.findById(company_res?.createdBy)
+
+const userCompanies= ((companyCreatedByUser?.companies?.length > 0) ? (companyCreatedByUser?.companies?.map((company)=>{
+if(company.companyID){
+    return ({
+      companyID:company?.companyID,
+      companyRoles:['SUPER_ADMIN',...company?.companyRole],
+      companyEmployee:{isCompanyEmployee:company?.companyEmployee?.isCompanyEmployee,jobPosition:company?.companyEmployee?.jobPosition}
+    })
+}
+return ({
+  companyID:company?.companyID,
+  companyRoles:company?.companyRole,
+  companyEmployee:{isCompanyEmployee:company?.companyEmployee?.isCompanyEmployee,jobPosition:company?.companyEmployee?.jobPosition}
+})
+
+
+})) : [{
+  companyID:company_res?._id,
+  companyRoles:['SUPER_ADMIN'],
+  }
+])
+    await User.findByIdAndUpdate(company_res?.createdBy?._id,{companies:userCompanies})
     return { body: company_res, status: { status: 201 } };
   } catch (error) {
     return {
@@ -111,6 +143,10 @@ export const updateCompany = async (req, res) => {
       };
     }
 
+    const customRoles = ((payload.companyRoles && payload.companyRoles.length > 0) ? payload.companyRoles : [] )
+
+
+
     const company_data = await Company.findOne({
       companyID: payload.companyID,
     });
@@ -145,6 +181,8 @@ export const updateCompany = async (req, res) => {
             comapnyStaff: payload.comapnyStaff
             ? (await findOrCreateUser(payload.comapnyStaff)) || null
             : null,
+            companyRoles:[...DEFAULTCOMPANYROLES, ...(customRoles.map((customRole)=>(customRole?.trim()?.replace(/\s+/g, '_')?.trim()?.toUpperCase())))]
+
         })
       ,
       {

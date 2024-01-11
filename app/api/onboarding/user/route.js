@@ -4,9 +4,11 @@ import { NextResponse } from 'next/server'
 
 export async function POST(req) {
     const body= await req.json()
-    if(!body)
+    if(Object.keys(body)?.length === 0)
     {
-        return new Response({error_message:"No Payload!"}, {status:400});
+     
+        return NextResponse.json({error_message:"Payload is missing!!!"}, {status:400})
+      
     }
     await dbConnect()
 const res = await createUser ({body})
