@@ -1,8 +1,9 @@
-import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObjectForArrayOfMongoDBIDForUser";
+import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObject";
 import Company from "../../Models/Company/Company";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
 import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
 import User from "@/Models/User/User";
+import { filterOBJwithKeys } from "@/Utils/filterOBJwithKeys";
 
 const DEFAULTCOMPANYROLES = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'ANALYST', 'OUTTER_GUARD', 'INNER_GUARD', 'MAIN_GATE_GUARD', 'MAINTANCE_WORKER', 'EMPLOYEE', 'OWNER', 'VISITOR', 'CLIENT', 'GUEST']
 
@@ -229,6 +230,65 @@ export const deleteCompany = async (req, res) => {
     }
     await Company.findByIdAndDelete(company._id);
     return { body: { isDeleted: true }, status: { status: 200 } };
+  } catch (error) {
+    return {
+      body: {
+        error_code: 400,
+        error_message: `Error message - ${error}`,
+      },
+      status: { status: 400 },
+    };
+  }
+};
+
+
+// GET ALL Companies
+export const getCompanies = async (req, res) => {
+  try {
+    const { skip, count, select } = req?.query;
+    const start = parseInt(skip || 0);
+    const end = (start + (parseInt(count && count <= 1000 ? count : 1000) ));
+    const filteredByFields = select ? select.split(',') : [];
+    
+
+    let companies = await Company.find().populate("createdBy").lean().exec();
+    const totalRecords = companies.length
+    companies=companies.map((company) => 
+    {
+
+      const companyWithOutSensitiveValues = {
+        createdBy: removeKeyValuePairsFromAnObject(company.createdBy, [
+          "password",
+        ]),
+        ...company,
+      }
+
+      if(filteredByFields.length === 0){
+
+return (companyWithOutSensitiveValues)
+      }
+     
+      const filteredcompany = filterOBJwithKeys(company,filteredByFields) 
+      if(Object.keys(filteredcompany).length === 0) {
+        return null
+      }
+
+
+
+
+   return (filteredcompany)
+  }
+    );
+    const page= companies.filter((company)=>(company !== null)).splice(start, end);
+
+    return {
+      body: {
+        companies: page,
+        count: page?.length,
+        totalRecords
+      },
+      status: { status: 200 },
+    };
   } catch (error) {
     return {
       body: {

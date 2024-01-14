@@ -1,10 +1,27 @@
-import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObjectForArrayOfMongoDBIDForUser";
+import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFromAnObject";
 import Society from "../../Models/Society/Society";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
 import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
 import SocietyRole from "@/Models/Role Models/Society_Role";
+import { filterOBJwithKeys } from "@/Utils/filterOBJwithKeys";
 
-const DEFAULTSOCIETYROLES = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'ANALYST', 'OUTTER_GUARD', 'INNER_GUARD', 'MAIN_GATE_GUARD', 'MAINTANCE_WORKER', 'TENENT', 'OWNER', 'SOCIETY_MEMBER', 'SOCIETY_CHAIRMAN', 'GUEST', 'MAID']
+const DEFAULTSOCIETYROLES = [
+  "OWNER",
+  "SUPER_ADMIN",
+  "ADMIN",
+  "OPERATOR",
+  "ANALYST",
+  "OUTTER_GUARD",
+  "INNER_GUARD",
+  "MAIN_GATE_GUARD",
+  "MAINTANCE_WORKER",
+  "TENENT",
+  "OWNER",
+  "SOCIETY_MEMBER",
+  "SOCIETY_CHAIRMAN",
+  "GUEST",
+  "MAID",
+];
 
 export const createSociety = async (req, res) => {
   try {
@@ -21,7 +38,7 @@ export const createSociety = async (req, res) => {
       societyGuards,
       projectReraNumber,
       createdBy,
-      societyRoles 
+      societyRoles,
     } = req.body;
     const societyID =
       societyName.replace(/\s/g, "").toLowerCase() + officePhoneNumbers[0];
@@ -38,7 +55,8 @@ export const createSociety = async (req, res) => {
       };
     }
 
-const customRoles = ((societyRoles && societyRoles.length > 0) ? societyRoles : [] )
+    const customRoles =
+      societyRoles && societyRoles.length > 0 ? societyRoles : [];
 
     const societyObj = {
       societyID,
@@ -64,7 +82,12 @@ const customRoles = ((societyRoles && societyRoles.length > 0) ? societyRoles : 
         : [],
       projectReraNumber,
       createdBy: createdBy ? (await findOrCreateUser(createdBy)) || null : null,
-      societyRoles:[...DEFAULTSOCIETYROLES, ...(customRoles.map((customRole)=>(customRole?.trim()?.replace(/\s+/g, '_')?.trim()?.toUpperCase())))]
+      societyRoles: [
+        ...DEFAULTSOCIETYROLES,
+        ...customRoles.map((customRole) =>
+          customRole?.trim()?.replace(/\s+/g, "_")?.trim()?.toUpperCase()
+        ),
+      ],
     };
 
     //Society creation
@@ -105,7 +128,10 @@ export const updateSociety = async (req, res) => {
       };
     }
 
-    const customRoles = ((payload.societyRoles && payload.societyRoles.length > 0) ? payload.societyRoles : [] )
+    const customRoles =
+      payload.societyRoles && payload.societyRoles.length > 0
+        ? payload.societyRoles
+        : [];
 
     const society_data = await Society.findOne({
       societyID: payload.societyID,
@@ -120,37 +146,44 @@ export const updateSociety = async (req, res) => {
       };
     }
 
-
-
-
     const updatedSociety = await Society.findOneAndUpdate(
       { societyID: payload?.societyID },
 
       removeNullValueFromAnObject({
-          ...updatedRequest
-                  ,societyMembers: payload.societyMembers
-            ? (
-                await findOrCreateUser(
-                  payload.societyMembers.map((member) => ({ worker: member }))
-                )
-              ).map((member) => member?.worker) || null
-            : null,
-          societyGuards: payload.societyGuards
-            ? (await findOrCreateUser(payload.societyGuards)) || null
-            : null,
-          societyStaffs: payload.societyStaffs
-            ? (await findOrCreateUser(payload.societyStaffs)) || null
-            : null,
-            societyRoles:[...DEFAULTSOCIETYROLES,...(customRoles.map((customRole)=>(customRole?.trim()?.replace(/\s+/g, '_')?.trim()?.toUpperCase())))]
-        })
+        ...updatedRequest,
+        societyMembers: payload.societyMembers
+          ? (
+              await findOrCreateUser(
+                payload.societyMembers.map((member) => ({ worker: member }))
+              )
+            ).map((member) => member?.worker) || null
+          : null,
+        societyGuards: payload.societyGuards
+          ? (await findOrCreateUser(payload.societyGuards)) || null
+          : null,
+        societyStaffs: payload.societyStaffs
+          ? (await findOrCreateUser(payload.societyStaffs)) || null
+          : null,
+        societyRoles: [
+          ...DEFAULTSOCIETYROLES,
+          ...customRoles.map((customRole) =>
+            customRole?.trim()?.replace(/\s+/g, "_")?.trim()?.toUpperCase()
+          ),
+        ],
+      }),
 
-      ,
       {
         new: true,
       }
     ).select(["-_id", "-__v"]);
 
-    return { body: { updatedSocietyData:updatedSociety,priviousSocietyData:society_data}, status: { status: 200 } };
+    return {
+      body: {
+        updatedSocietyData: updatedSociety,
+        priviousSocietyData: society_data,
+      },
+      status: { status: 200 },
+    };
   } catch (error) {
     return {
       body: {
@@ -165,7 +198,6 @@ export const updateSociety = async (req, res) => {
 // Society deletion
 export const deleteSociety = async (req, res) => {
   try {
-
     if (Object.keys(req.body).length === 0) {
       return {
         body: {
@@ -203,8 +235,86 @@ export const deleteSociety = async (req, res) => {
 // GET ALL Society
 export const getSocieties = async (req, res) => {
   try {
-    const societies = await Society.find();
-    return { body: { societies }, status: { status: 200 } };
+    const { skip, count,select } = req?.query;
+    const start = parseInt(skip || 0);
+    const end = (start + (parseInt(count && count <= 1000 ? count : 1000) ));
+    const filteredByFields = select ? select.split(',') : [];
+   
+
+    let societies = await Society.find().populate("createdBy").lean().exec();
+    const totalRecords = societies.length
+    societies = societies.map((society) => 
+    {
+
+      const socityWithOutSensitiveValues = {
+        createdBy: removeKeyValuePairsFromAnObject(society.createdBy, [
+          "password",
+        ]),
+        ...society,
+      }
+
+      if(filteredByFields.length === 0){
+
+return (socityWithOutSensitiveValues)
+      }
+     
+      const filteredSociety = filterOBJwithKeys(society,filteredByFields) 
+      if(Object.keys(filteredSociety).length === 0) {
+        return null
+      }
+
+
+
+
+   return (filteredSociety)
+  }
+    );
+    const page = societies.filter((society)=>(society !== null)).splice(start, end);
+
+    return {
+      body: {
+        societies: page,
+        count: page?.length,
+        totalRecords
+      },
+      status: { status: 200 },
+    };
+  } catch (error) {
+    return {
+      body: {
+        error_code: 400,
+        error_message: `Error message - ${error}`,
+      },
+      status: { status: 400 },
+    };
+  }
+};
+
+
+// GET Society By societyID
+export const getSocietyByID = async (req, res) => {
+  try {
+    const { params } = req;
+    const {societyID} = params
+    
+
+    const society = await Society.findOne({societyID}).populate("createdBy").exec();
+    if(!society){
+      return {
+        body: {
+          error_code: 404,
+          error_message: 'Scoiety is Not Found!',
+        },
+        status: { status: 404 },
+      };
+    }
+
+    return {
+      body: {
+        society
+      },
+      status: { status: 200 },
+    };
   } catch (error) {
     return {
       body: {

@@ -45,7 +45,7 @@ const SocietySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    societyRoles:[{type:String,unique:true}]
+    societyRoles:[{type:String}]
   },
   { timestamps: true }
 );
