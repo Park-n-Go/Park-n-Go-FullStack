@@ -7,7 +7,7 @@ export const filterOBJwithKeys= (OBJ,listOfKeys)=>{
 
     
       listOfKeys.forEach((key)=>{
-        if (OBJ.hasOwnProperty("_doc")) {
+        if (OBJ?.hasOwnProperty("_doc")) {
 
           if(OBJ._doc[key]){
           filteredOBJ[key]=OBJ._doc[key]

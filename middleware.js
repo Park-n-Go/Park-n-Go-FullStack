@@ -6,6 +6,6 @@ publicRoutes: ['/','/api/webhooks(.*)','/api(.*)']
 });
  
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)' ,'/(aapi|trpc)(.*)' , '/test'],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)' , '/test'],
 };
  

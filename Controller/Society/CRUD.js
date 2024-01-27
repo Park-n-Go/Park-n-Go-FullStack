@@ -2,26 +2,12 @@ import { removeKeyValuePairsFromAnObject } from "@/Utils/removeKeyValuePairsFrom
 import Society from "../../Models/Society/Society";
 import { findOrCreateUser } from "@/Utils/findOrCreateUser";
 import { removeNullValueFromAnObject } from "@/Utils/removeNullValueFromAnObject";
-import SocietyRole from "@/Models/Role Models/Society_Role";
 import { filterOBJwithKeys } from "@/Utils/filterOBJwithKeys";
 
-const DEFAULTSOCIETYROLES = [
-  "OWNER",
-  "SUPER_ADMIN",
-  "ADMIN",
-  "OPERATOR",
-  "ANALYST",
-  "OUTTER_GUARD",
-  "INNER_GUARD",
-  "MAIN_GATE_GUARD",
-  "MAINTANCE_WORKER",
-  "TENENT",
-  "OWNER",
-  "SOCIETY_MEMBER",
-  "SOCIETY_CHAIRMAN",
-  "GUEST",
-  "MAID",
-];
+import User from "@/Models/User/User";
+import { chunkify } from "@/Utils/chunkify";
+import { createPNGRolesAndPermissions } from "../PNG/RolesAndPermissions/CRUD";
+
 
 export const createSociety = async (req, res) => {
   try {
@@ -82,19 +68,44 @@ export const createSociety = async (req, res) => {
         : [],
       projectReraNumber,
       createdBy: createdBy ? (await findOrCreateUser(createdBy)) || null : null,
-      societyRoles: [
-        ...DEFAULTSOCIETYROLES,
-        ...customRoles.map((customRole) =>
-          customRole?.trim()?.replace(/\s+/g, "_")?.trim()?.toUpperCase()
-        ),
-      ],
     };
 
     //Society creation
     const society = new Society(societyObj);
     await society.save();
-    const society_res = await Society.findById(society._id, { _id: 0, __v: 0 });
-    return { body: society_res, status: { status: 201 } };
+    const society_res = await Society.findById(society._id, {__v: 0 });
+
+    const societyCreatedByUser = await User.findById(society_res?.createdBy)
+    const userSocieties= [...societyCreatedByUser?.societies,{
+      societyID:society_res?._id,
+      societyRoles:["SUPER_ADMIN"],
+      }
+    ] 
+          await User.findByIdAndUpdate(society_res?.createdBy?._id,{societies:userSocieties});
+
+    //Society Default Roles Creation
+     
+    await createPNGRolesAndPermissions({body:{
+      userName: process.env.MASTERUSERNAME,
+      password: process.env.MASTERUSERPASSWORD,
+      pngRole: {
+          vendorID: society_res.societyID,
+          vendorType: "SOCIETY",
+          vendorRoles: [
+              {
+                  category: "OFFICE",
+                  role: "OFFICE_MANAGER",
+                  permission: "ALL_PERMISSION"
+              }
+          ]
+      }
+  }})
+  
+  const societyRoleUpdated = await Society.findById(society_res._id)
+
+
+
+    return { body: societyRoleUpdated, status: { status: 201 } };
   } catch (error) {
     return {
       body: {
@@ -236,6 +247,7 @@ export const deleteSociety = async (req, res) => {
 export const getSocieties = async (req, res) => {
   try {
     const { skip, count,select } = req?.query;
+
     const start = parseInt(skip || 0);
     const end = (start + (parseInt(count && count <= 1000 ? count : 1000) ));
     const filteredByFields = select ? select.split(',') : [];
@@ -263,13 +275,10 @@ return (socityWithOutSensitiveValues)
         return null
       }
 
-
-
-
    return (filteredSociety)
   }
     );
-    const page = societies.filter((society)=>(society !== null)).splice(start, end);
+    const page = chunkify(societies,start,end);
 
     return {
       body: {

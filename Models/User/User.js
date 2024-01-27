@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { AddressSchema } from "../../Utils/CustomSchemaModels/Address";
+import { AddressSchema } from "../../Utils/CustomSchemaModels/Address.js";
+import RolesAndPermissions from "../RolesAndPermissions/RolesAndPermissions.js"
 
 const UserSchema = new mongoose.Schema(
   {
@@ -37,11 +38,7 @@ const UserSchema = new mongoose.Schema(
       required: false,
       min: 5,
     },
-    pngRole: {
-      type: String,
-      default: "User",
-      set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()
-    },
+    pngRoles: [{ type: String }],
     vehicleIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" }],
 
     profilePicture: { type: String },
@@ -61,14 +58,14 @@ const UserSchema = new mongoose.Schema(
       
     }],
     userAddress: { type: AddressSchema },
-    societies: {
+    societies: [{
       societyID: { type: mongoose.Schema.Types.ObjectId, ref: "Society" },
       isSocietyMembers: { type: String },
       isSocietyStaffs: { type: Boolean },
       isSocietyGuards: { type: Boolean },
       societyRoles:[{type:String,
         set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()}]
-    },
+    }],
   },
   { timestamps: true }
 );
