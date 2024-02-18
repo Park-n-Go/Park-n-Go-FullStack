@@ -41,9 +41,6 @@ export const createSociety = async (req, res) => {
       };
     }
 
-    const customRoles =
-      societyRoles && societyRoles.length > 0 ? societyRoles : [];
-
     const societyObj = {
       societyID,
       societyName,
@@ -91,13 +88,7 @@ export const createSociety = async (req, res) => {
       pngRole: {
           vendorID: society_res.societyID,
           vendorType: "SOCIETY",
-          vendorRoles: [
-              {
-                  category: "OFFICE",
-                  role: "OFFICE_MANAGER",
-                  permission: "ALL_PERMISSION"
-              }
-          ]
+          vendorRoles: []
       }
   }})
   

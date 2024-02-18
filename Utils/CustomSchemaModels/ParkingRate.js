@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const feeIncrementalSchema = new mongoose.Schema({
-  type:{
-    type:String
-  },
+  type:{type:String,
+    set: value =>  value?.replace(/\s/g, '')?.trim()?.toUpperCase()},
 
   increasedBy:{type:Number},
-  after:{type:String},
+  after:{type:Number},
 
 
 })
@@ -29,7 +28,7 @@ const RateSchema = new mongoose.Schema({
   },
   hourly: { type: Boolean, required: true },
   
-  incrementalFee: [feeIncrementalSchema]
+  incrementalFee: {type:feeIncrementalSchema}
 });
 
 export const ParkingRateSchema = new mongoose.Schema(

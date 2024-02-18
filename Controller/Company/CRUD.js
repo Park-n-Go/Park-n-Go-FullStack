@@ -8,6 +8,7 @@ import { chunkify } from "@/Utils/chunkify";
 import bcrypt from "bcrypt";
 import { createPNGRolesAndPermissions } from "../PNG/RolesAndPermissions/CRUD";
 import { main, sendMail, sendmail } from "@/Utils/sendEmail";
+import RolesAndPermissions from "@/Models/RolesAndPermissions/RolesAndPermissions";
 
 
 ;
@@ -75,11 +76,7 @@ export const createCompany = async (req, res) => {
       companyLocation,
       subcription,
       enrollmentDate,
-      equipmentIDs: equipmentIDs
-        ? equipmentIDs.map((equipmentID) => {
-            bcrypt.hashSync(equipmentID, parseInt(process.env.HASH_SALT));
-          })
-        : [],
+      equipmentIDs: equipmentIDs || [],
       companyGSTNumber,
       companyPANNumber,
       parkingRate,
@@ -111,17 +108,11 @@ export const createCompany = async (req, res) => {
     pngRole: {
         vendorID: company_res.companyID,
         vendorType: "COMPANY",
-        vendorRoles: [
-            {
-                category: "EXECUTIVE",
-                role: "CEO",
-                permission: "ALL_PERMISSION"
-            }
-        ]
+        vendorRoles: []
     }
 }})
 
-const companyRoleUpdated = await Company.findById(company._id)
+const companyRoleUpdated = await Company.findById(company_res._id)
 
     return { body: companyRoleUpdated, status: { status: 201 } };
   } catch (error) {
@@ -157,10 +148,21 @@ export const updateCompany = async (req, res) => {
       };
     }
 
-    const customRoles =
-      payload.companyRoles && payload.companyRoles.length > 0
-        ? payload.companyRoles
-        : [];
+    if(payload.companyRoles){
+
+      await createPNGRolesAndPermissions({body:{
+        userName: process.env.MASTERUSERNAME,
+        password: process.env.MASTERUSERPASSWORD,
+        pngRole: {
+            vendorID: payload.companyID,
+            vendorType: "COMPANY",
+            vendorRoles: payload.companyRoles
+        }
+    }})
+
+       
+    }
+    
 
     const company_data = await Company.findOne({
       companyID: payload.companyID,
@@ -195,17 +197,10 @@ export const updateCompany = async (req, res) => {
         comapnyStaff: payload.comapnyStaff
           ? (await findOrCreateUser(payload.comapnyStaff)) || null
           : null,
-        companyRoles: [
-          ...DEFAULTCOMPANYROLES,
-          ...customRoles.map((customRole) =>
-            customRole?.trim()?.replace(/\s+/g, "_")?.trim()?.toUpperCase()
-          ),
-        ],
+        companyRoles: await RolesAndPermissions.findOne({vendorID:payload.companyID}).vendorRoles,
         equipmentIDs: payload.equipmentIDs
-          ? payload.equipmentIDs.map((equipmentID) => {
-              return bcrypt.hashSync(equipmentID, parseInt(process.env.HASH_SALT));
-            })
-          : [],
+          ? [...company_data.equipmentIDs,...payload.equipmentIDs.filter((eqID)=>(!company_data.equipmentIDs.includes(eqID)))]
+          : company_data.equipmentIDs,
       }),
       {
         new: true,

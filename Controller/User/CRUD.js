@@ -88,11 +88,7 @@ export const createUser = async (req, res) => {
       password: user_data?.password
         ? bcrypt.hashSync(user_data?.password, parseInt(process.env.HASH_SALT))
         : null,
-        pngRoles: (user_data?.pngRoles
-        ? [...user_data?.pngRoles]
-        : ["USER"]
-          )
-          
+      pngRoles: user_data?.pngRoles ? [...user_data?.pngRoles] : ["USER"],
     };
     //User creation
     const user = new User(userObj);
