@@ -7,6 +7,7 @@ import { filterOBJwithKeys } from "@/Utils/filterOBJwithKeys";
 import User from "@/Models/User/User";
 import { chunkify } from "@/Utils/chunkify";
 import { createPNGRolesAndPermissions } from "../PNG/RolesAndPermissions/CRUD";
+import RolesAndPermissions from "@/Models/RolesAndPermissions/RolesAndPermissions";
 
 
 export const createSociety = async (req, res) => {
@@ -25,6 +26,7 @@ export const createSociety = async (req, res) => {
       projectReraNumber,
       createdBy,
       societyRoles,
+      equipmentIDs
     } = req.body;
     const societyID =
       societyName.replace(/\s/g, "").toLowerCase() + officePhoneNumbers[0];
@@ -50,6 +52,7 @@ export const createSociety = async (req, res) => {
       builderOfficeAddress,
       societyAddress,
       flates,
+      equipmentIDs: equipmentIDs || [],
       societyMembers: societyMembers
         ? (
             await findOrCreateUser(
@@ -130,10 +133,20 @@ export const updateSociety = async (req, res) => {
       };
     }
 
-    const customRoles =
-      payload.societyRoles && payload.societyRoles.length > 0
-        ? payload.societyRoles
-        : [];
+    if(payload.societyRoles){
+
+      await createPNGRolesAndPermissions({body:{
+        userName: process.env.MASTERUSERNAME,
+        password: process.env.MASTERUSERPASSWORD,
+        pngRole: {
+            vendorID: payload.societyID,
+            vendorType: "SOCIETY",
+            vendorRoles: payload.societyRoles
+        }
+    }})
+
+       
+    }
 
     const society_data = await Society.findOne({
       societyID: payload.societyID,
@@ -166,12 +179,15 @@ export const updateSociety = async (req, res) => {
         societyStaffs: payload.societyStaffs
           ? (await findOrCreateUser(payload.societyStaffs)) || null
           : null,
-        societyRoles: [
-          ...DEFAULTSOCIETYROLES,
-          ...customRoles.map((customRole) =>
-            customRole?.trim()?.replace(/\s+/g, "_")?.trim()?.toUpperCase()
-          ),
-        ],
+          societyRoles: await RolesAndPermissions.findOne({vendorID:payload.societyID}).vendorRoles,
+          equipments: payload.equipments
+          ? [...society_data.equipments,...payload.equipments.map((eq)=>{
+            return (eq.equipmentID)
+          }).filter((eqID)=>(!society_data.equipments.map((eq)=>{
+            return (eq.equipmentID)
+          }).includes(eqID)))]
+          : society_data.equipments
+
       }),
 
       {

@@ -32,7 +32,7 @@ const RateSchema = new mongoose.Schema({
 });
 
 export const ParkingRateSchema = new mongoose.Schema(
-  {
+  {isParkingChargable:{type: Boolean},
    rates: [{type: RateSchema}],
   },
   { timestamps: true }

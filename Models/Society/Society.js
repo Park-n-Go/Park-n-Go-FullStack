@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { AddressSchema } from "../../Utils/CustomSchemaModels/Address";
 import { WorkerSchema } from "../../Utils/CustomSchemaModels/Worker";
+import { imageSchema } from "@/Utils/CustomSchemaModels/imgSchema";
+import { equipmentSchema } from "@/Utils/CustomSchemaModels/equipments";
 
 const FlatSchema = new mongoose.Schema({
   type: { type: String, required: true },
@@ -23,7 +25,7 @@ const SocietySchema = new mongoose.Schema(
       min: 2,
       max: 100,
     },
-    societyEntrancePicture: { type: String },
+    societyProfilePicture: { type: imageSchema  },
     officePhoneNumbers: [{ type: String, required: true }],
     builderName: { type: String, required: true },
     builderOfficeAddress: { type: AddressSchema },
@@ -45,8 +47,11 @@ const SocietySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    societyRoles:[{type:String}]
+    societyRoles:[{type:String}],
+    
+    equipments: [{type:equipmentSchema}]
   },
+  
   { timestamps: true }
 );
 

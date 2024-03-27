@@ -16,8 +16,15 @@ export default function Test(props) {
   const companyID = useAppSelector(
     (state) => state.dashboardOptionReducer.companyID
   );
+  const societyID = useAppSelector(
+    (state) => state.dashboardOptionReducer.societyID
+  );
+  const view = useAppSelector(
+    (state) => state.dashboardOptionReducer.view
+  );
  
-  const result = useQuery({
+  if(view === "company"){
+  const {data,isError,isFetched,isLoading,error} = useQuery({
     queryKey: ['parkingLogs',companyID],
     queryFn: async () => { 
       const data = await fetchData("get",`parkinglog/get-parkinglogs/${companyID}`)
@@ -29,41 +36,37 @@ export default function Test(props) {
       staleTime: 1000,
       refetchInterval:5000
   })
+  if(isLoading) return(<div className="w-full h-screen flex justify-center items-center">Loading...</div>)
+if(isError) return(<div className="w-full h-screen flex justify-center items-center">{error}</div>)
+  }
+  if(view === "society"){
+  const {data,isError,isFetched,isLoading,error} = useQuery({
+    queryKey: ['parkingLogs',societyID],
+    queryFn: async () => { 
+      const data = await fetchData("get",`parkinglog/get-parkinglogs/${societyID}`)
+      
+             setData(JSON.stringify(data))
+             setFetchCount((fetchCount) => fetchCount + 1)
+     return (data)},
+    initialData: props.data,
+      staleTime: 1000,
+      refetchInterval:5000
+  })
+  if(isLoading) return(<div className="w-full h-screen flex justify-center items-center">Loading...</div>)
+if(isError) return(<div className="w-full h-screen flex justify-center items-center">{error}</div>)
+  }
+  useEffect(() => {
+
+  }, [passedData,fetchCount,companyID,view]);
 
 
+{
 
-// const fetch=(companyID)=>{
-//   const { isPending, isError, data, error } = useQuery({
-//     queryKey: ['parkingLogs',companyID],
-//     queryFn:async ()=>{ 
-//      const data = await fetchData("get",`/parkinglog/get-parkinglogs/${companyID}`)
-     
-//             setData(JSON.stringify(data))
-//             setFetchCount((fetchCount) => fetchCount + 1)
-//     return (data)}
-//   })
   
-// }
-  
+
+}
 
 
-
-  // const res = 
-  
-
-    
-  
-  
-   
-  //   // We can assume by this point that `isSuccess === true`
-    
-  // }
-
-
-
-  // useEffect(() => {
-
-  // }, [passedData,fetchCount]);
 
   return (passedData ? (
     <div className="text-black flex items-center justify-center ">
@@ -71,7 +74,7 @@ export default function Test(props) {
       <div className="m-10 cursor-pointer">{fetchCount}</div>
       <button
         className="bg-indigo-700 text-white w-20 h-10 rounded-xl ml-10 cursor-pointer hover:bg-indigo-400"
-    onClick={(companyID)=>{
+    onClick={()=>{
       
     }}
       >

@@ -72,3 +72,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components{
+  .owner_dashboard_hover_effect {
+    @apply transition ease-in-out delay-150  hover:-translate-y-1 hover:scale-105 duration-300
+  }
+
+  .hide_scrollbar::-webkit-scrollbar {
+      display: none;
+     -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;
+    }
+  
+}

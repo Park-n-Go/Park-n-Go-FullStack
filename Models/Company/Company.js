@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { WorkerSchema } from "../../Utils/CustomSchemaModels/Worker";
 import { ParkingRateSchema } from "@/Utils/CustomSchemaModels/ParkingRate";
 import { AddressSchema } from "@/Utils/CustomSchemaModels/Address";
+import { imageSchema } from "@/Utils/CustomSchemaModels/imgSchema";
+import { equipmentSchema } from "@/Utils/CustomSchemaModels/equipments";
 
 const CompanySchema = new mongoose.Schema(
   {
@@ -13,7 +15,7 @@ const CompanySchema = new mongoose.Schema(
       max: 100,
     },
     companyOfficeEmail: [{ type: String, required: true, unique: true }],
-    companyProfilePicture: { type: String },
+    companyProfilePicture: { type: imageSchema },
     officePhoneNumbers: [{ type: String, required: true }],
     buildingName: { type: String, required: true },
     headOfficeAddress: { type: AddressSchema},
@@ -39,7 +41,7 @@ const CompanySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },companyRoles:[{type:String,unique:true}],
-    equipmentIDs:[{type:String,unique:true}]
+    equipments: [{type:equipmentSchema}]
   },
   { timestamps: true }
 );

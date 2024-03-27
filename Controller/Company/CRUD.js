@@ -34,7 +34,7 @@ export const createCompany = async (req, res) => {
       companyPANNumber,
       parkingRate,
       createdBy,
-      equipmentIDs,
+      equipments,
     } = req.body;
     const companyID =
       companyName.replace(/\s/g, "").toLowerCase() + officePhoneNumbers[0];
@@ -76,7 +76,7 @@ export const createCompany = async (req, res) => {
       companyLocation,
       subcription,
       enrollmentDate,
-      equipmentIDs: equipmentIDs || [],
+      equipments: equipments || [],
       companyGSTNumber,
       companyPANNumber,
       parkingRate,
@@ -198,9 +198,13 @@ export const updateCompany = async (req, res) => {
           ? (await findOrCreateUser(payload.comapnyStaff)) || null
           : null,
         companyRoles: await RolesAndPermissions.findOne({vendorID:payload.companyID}).vendorRoles,
-        equipmentIDs: payload.equipmentIDs
-          ? [...company_data.equipmentIDs,...payload.equipmentIDs.filter((eqID)=>(!company_data.equipmentIDs.includes(eqID)))]
-          : company_data.equipmentIDs,
+        equipments: payload.equipments
+          ? [...company_data.equipments,...payload.equipments.map((eq)=>{
+            return (eq.equipmentID)
+          }).filter((eqID)=>(!company_data.equipments.map((eq)=>{
+            return (eq.equipmentID)
+          }).includes(eqID)))]
+          : company_data.equipments
       }),
       {
         new: true,
