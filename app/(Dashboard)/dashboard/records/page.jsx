@@ -60,7 +60,6 @@ const Logs = () => {
     return <NoPropertiesWithUsPage />;
   }
   return (
-    <Suspense fallback={<LogTableLoading />}>
       <div className=" h-screen p-2 w-full ">
         <h1 className="text-3xl text-tremor-content dark:text-dark-tremor-content">
           {view.toLowerCase() === "company" ? "Parking" : "Entry"} Logs
@@ -114,7 +113,6 @@ const Logs = () => {
           />
         )}
       </div>
-    </Suspense>
   );
 };
 

@@ -1,9 +1,31 @@
 export const removeNullValueFromAnObject = (OBJ)=>{
+     const filteredObject = []
+     
+     
+        Object.entries(OBJ).forEach(([key, value]) => {
 
-    const filteredObject = Object.fromEntries(
-        Object.entries(OBJ).filter(([key, value]) => ((value !== null && value !== undefined && value !== "" ) || (Array.isArray(value) && value.length > 0)))
-      );
+          if (Array.isArray(value)){
+            filteredObject.push([key,value])
+            return
+            }
 
-      return (filteredObject)
+
+            if(typeof(value) === "object" && value!== null && value !== undefined && value !== "" && !Array.isArray(value) )
+            {
+              filteredObject.push([key,removeNullValueFromAnObject(value)])
+              return
+            }   
+          if (value !== null && value !== undefined && value !== "" && !Array.isArray(value))
+          {
+            filteredObject.push([key,value])
+            return
+          }
+        
+        }
+        
+        
+        )
+
+      return (Object.fromEntries(filteredObject))
 
 }

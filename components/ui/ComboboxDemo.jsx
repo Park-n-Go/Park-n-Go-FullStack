@@ -32,7 +32,6 @@ import { usePathname, useRouter } from "next/navigation"
 
 export function ComboboxDemo(props) {
   const {  user  } = useUser();
-const [userName,setUserName] = React.useState(null)
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState(props.option === "company" ? useAppSelector((store)=> (store.dashboardOptionReducer.companyID)) : useAppSelector ((store)=> (store.dashboardOptionReducer.societyID)))
 
@@ -52,6 +51,8 @@ const [userName,setUserName] = React.useState(null)
       dispatch(setQuery(""))
       nextRouter.push("/dashboard")
     }
+   
+    if(user){
     if(props.option === "company"){
      fetchData("get",`user/${user?.username}/companies?select=companyName,companyID`).then((res)=>{
       const companyList = res.companies?.map((company)=>{
@@ -60,9 +61,13 @@ const [userName,setUserName] = React.useState(null)
       })
 
       setCompanies(companyList)
-      if(value === ''){
+      if((value === '' || value === null  || value === undefined) && companyList?.length > 0){
         dispatch(setCompanyID(companyList[0].value))
-        setValue(companyList[0].value)
+        setValue(companyList[0].value) 
+        if(companyList[0].value)  {
+          localStorage.setItem("companyID", companyList[0].value)
+
+        }     
       }
       
 
@@ -72,20 +77,24 @@ const [userName,setUserName] = React.useState(null)
      
     }else if(props.option === "society"){
       fetchData("get",`user/${user?.username}/societies?select=societyName,societyID`).then((res)=>{
-        const societyList = res.societies.map((society)=>{
+        const societyList = res.societies?.map((society)=>{
   
           return({label:society.societyName,value:society.societyID})
         })
         setSocities(societyList)
-        if(value === ''){
+        if((value === '' || value === null  || value === undefined) && societyList?.length > 0){
           dispatch(setSocietyID(societyList[0].value))
           setValue(societyList[0].value)
+          if(societyList[0].value)  {
+
+          localStorage.setItem("societyID", societyList[0].value)
+          }
           }
       
       
        })
     }
-
+  }
   },[user,value])
 
   if(socities){
@@ -115,7 +124,9 @@ const [userName,setUserName] = React.useState(null)
                   value={Society.value}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue)
+                    
                     dispatch(setSocietyID(currentValue))
+                    localStorage.setItem("societyID", currentValue)
                     setOpen(false)
                     
                   }}
@@ -167,6 +178,8 @@ const [userName,setUserName] = React.useState(null)
                 onSelect={(currentValue) => {
                   setValue(currentValue === value ? "" : currentValue)
                   dispatch(setCompanyID(currentValue))
+                  
+                  localStorage.setItem("companyID", currentValue)
                   setOpen(false)
                 }}
                

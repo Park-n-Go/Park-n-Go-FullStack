@@ -16,8 +16,8 @@ const PakringLogViewTable = ({Heads,Data,Caption,For}) => {
   <TableCaption>{Caption}</TableCaption>
   <TableHeader>
     <TableRow>
-        {Heads?.map((Head)=>(
-            <TableHead>{Head}</TableHead>
+        {Heads?.map((Head,index)=>(
+            <TableHead key={index}>{Head}</TableHead>
         )) 
 }
     </TableRow>

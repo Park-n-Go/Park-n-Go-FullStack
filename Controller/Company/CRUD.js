@@ -315,3 +315,39 @@ export const getCompanies = async (req, res) => {
     };
   }
 };
+
+
+
+// GET Company By companyID
+export const getCompanyByID = async (req, res) => {
+  try {
+    const { params } = req;
+    const {companyID} = params
+    
+
+    const company = await Company.findOne({companyID}).populate("createdBy").exec();
+    if(!company){
+      return {
+        body: {
+          error_code: 404,
+          error_message: 'Company is Not Found!',
+        },
+        status: { status: 404 },
+      };
+    }
+
+    return {
+      body: company
+      ,
+      status: { status: 200 },
+    };
+  } catch (error) {
+    return {
+      body: {
+        error_code: 400,
+        error_message: `Error message - ${error}`,
+      },
+      status: { status: 400 },
+    };
+  }
+};

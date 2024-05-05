@@ -142,8 +142,8 @@ const Commerical_ParkingFee_ParkingLog_Page = ({ data, imageUrls }) => {
         </div>
         <div className="grid grid-cols-3 gap-5">
           <div className=" col-span-2 mt-12 h-11 rounded-md flex items-center justify-center w-full bg-indigo-500  text-tremor-brand-inverted text-2xl shadow-md">
-            Total: {data?.payment.totalAmount.currencySymbol}{" "}
-            {data?.payment.totalAmount.amount}
+            Total: {data?.payment?.totalAmount?.currencySymbol}{" "}
+            {data?.payment?.totalAmount?.amount}
           </div>
 
           <div

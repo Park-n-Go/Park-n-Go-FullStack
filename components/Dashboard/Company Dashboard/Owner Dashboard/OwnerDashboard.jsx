@@ -624,6 +624,8 @@ const OwnerDashboard =  (props) => {
   return (
     <div className="w-full mb-32">
       {/* Overview */}
+      
+      
       <section className="  grid grid-cols-4 mx-10 -mt-2 gap-5">
         {/* Revenue */}
         <Card
@@ -697,7 +699,11 @@ const OwnerDashboard =  (props) => {
             </span>
           </div>
         </Card>
-      </section>
+      
+      </section> 
+
+
+
       {/* Graph Chart and Bar for Parking */}
       <section className="grid grid-cols-3 gap-x-10 mx-10 mt-10 ">
         

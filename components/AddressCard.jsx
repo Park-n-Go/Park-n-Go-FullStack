@@ -4,10 +4,10 @@ import { Card } from "@tremor/react"
 
 const AddressCard = ({address}) => {
   return (<Card
-    className="mx-auto max-w-xs"
+    className=""
     decoration="top"
     decorationColor="indigo">
-        Company Address {JSON.stringify(address)}
+    {address?.city}
     </Card>
 
   )

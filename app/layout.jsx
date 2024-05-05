@@ -3,9 +3,12 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import StoreProvider from "../components/Providers/StoreProvider";
+import StoreProvider from "@/components/Providers/StoreProvider";
 import ReactQueryClientProvider from "@/components/Providers/ReactQueryClientProvider";
+import { Toaster } from "@/components/ui/sonner"
+
 const inter = Inter({ subsets: ["latin"] });
+
 
 export const metadata = {
   title: "Create Next App",
@@ -21,6 +24,7 @@ export default function RootLayout({ children }) {
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
             </ThemeProvider>
+            <Toaster />
           </body>
         </html>
       </ClerkProvider>

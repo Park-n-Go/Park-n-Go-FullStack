@@ -326,9 +326,9 @@ export const getSocietyByID = async (req, res) => {
     }
 
     return {
-      body: {
+      body: 
         society
-      },
+      ,
       status: { status: 200 },
     };
   } catch (error) {

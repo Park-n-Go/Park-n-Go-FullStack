@@ -1,5 +1,5 @@
 
-import { getSocietyByID } from "@/Controller/Society/CRUD";
+import { getCompanyByID } from "@/Controller/Company/CRUD";
 import { dbConnect } from "@/Utils/connectDB";
 
 import { NextResponse } from 'next/server'
@@ -11,7 +11,7 @@ export async function GET(req,context) {
         
         await dbConnect()
     
-    const res = await getSocietyByID({params})
+    const res = await getCompanyByID({params})
     
     return NextResponse.json(res.body,res.status)
     } catch (error) {

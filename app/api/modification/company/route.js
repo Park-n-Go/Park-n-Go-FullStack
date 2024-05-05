@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 export async function PATCH(req) {
     try {
         
+        
         const body = await req.json();
    
     if(!body.hasOwnProperty('companyID'))
